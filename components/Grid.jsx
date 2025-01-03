@@ -44,7 +44,7 @@ const Grid = () => {
     }, []);
 
     const drawLine = useCallback(
-      (letters, color = "blue") => {
+      (letters, color) => {
         const svg = svgRef.current;
         if (!svg || !gridRef.current) return;
   
@@ -62,51 +62,27 @@ const Grid = () => {
             letter.colIdx
           );
 
-          console.log('line 61');
-          console.log(x1, x2, y1, y2);
+          // console.log('line 61');
+          // console.log(x1, x2, y1, y2);
   
           const line = document.createElementNS(
             "http://www.w3.org/2000/svg",
             "line"
           );
-          line.setAttribute("x1", String(x1 + w1 / 2));
-          line.setAttribute("y1", String(y1 + h1 / 2));
-          line.setAttribute("x2", String(x2 + w2 / 2));
-          line.setAttribute("y2", String(y2 + h2 / 2));
-          line.setAttribute("stroke", "blue");
-          line.setAttribute("stroke-width", "4");
+          line.setAttribute("x1", String(x1 + w1/2));
+          line.setAttribute("y1", String(y1 + h1/2));
+          line.setAttribute("x2", String(x2 + w2/2));
+          line.setAttribute("y2", String(y2 + h2/2));
+          line.setAttribute("stroke", color);
+          line.setAttribute("stroke-width", "6");
           line.setAttribute("stroke-linecap", "round");
+          line.setAttribute("stroke-linejoin", "round");
           svg.appendChild(line);
         });
       },
       [getBtnPos, clearSVG]
     );
 
-    // const drawLine = useCallback(
-    //   (letters, color = "blue") => {
-    //     const svg = svgRef.current;
-    //     if (!svg || !gridRef.current) return;
-    
-    //     letters.forEach((letter, index) => {
-    //       if (index === 0) return;
-    //       const prev = letters[index - 1];
-    //       const { x: x1, y: y1, width: w1, height: h1 } = getBtnPos(prev.rowIdx, prev.colIdx);
-    //       const { x: x2, y: y2, width: w2, height: h2 } = getBtnPos(letter.rowIdx, letter.colIdx);
-
-    //       const line = document.createElementNS("https://www.w3.org/TR/SVG/", "line");
-    //       line.setAttribute("x1", String(x1 + w1 / 2));
-    //       line.setAttribute("y1", String(y1 + h1 / 2));
-    //       line.setAttribute("x2", String(x2 + w2 / 2));
-    //       line.setAttribute("y2", String(y2 + h2 / 2));
-    //       line.setAttribute("stroke", color); // Dynamic color
-    //       line.setAttribute("stroke-width", "4");
-    //       line.setAttribute("stroke-linecap", "round");
-    //       svg.appendChild(line);
-    //     });
-    //   },
-    //   [getBtnPos]
-    // );
-  
     const isAdjacent = (prev, curr) => {
         const dx = Math.abs(prev.rowIdx - curr.rowIdx);
         const dy = Math.abs(prev.colIdx - curr.colIdx);
@@ -143,6 +119,7 @@ const Grid = () => {
                     };
 
                     const updatedLetters = [...prev, newLetter];
+                    console.log(updatedLetters);
                     drawLine(updatedLetters);
                     return updatedLetters;
                 });
@@ -155,6 +132,7 @@ const Grid = () => {
         setIsDragging(false);
         const formedWord = selectedLetters.map((letter) => letter.letter).join("");
         console.log("Word formed: ", formedWord);
+        setFoundWords((prev) => [...prev, formedWord]);
 
         if(validWords.includes(formedWord)){
             const newWord = {
@@ -162,7 +140,8 @@ const Grid = () => {
                 letters: selectedLetters,
                 isAnswer: true,
             };
-            setFoundWords((prev) => [...prev, newWord]);
+            console.log("new word", newWord);
+            // setFoundWords((prev) => [...prev, newWord]);
         } else{
             console.log("Invalid Word: ", formedWord);
         }
@@ -171,14 +150,20 @@ const Grid = () => {
     };
 
     useEffect(() => {
+      console.log("Updated foundWords: ", foundWords);
+    }, [foundWords]);
+    
+    useEffect(() => {
       clearSVG();
     
       foundWords.forEach((fw) => {
-        drawLine(fw.letters, "blue"); 
+        if (fw.letters && Array.isArray(fw.letters)) {
+          drawLine(fw.letters, "blue");
+        }
       });
 
       if (selectedLetters.length >= 2) {
-        drawLine(selectedLetters, "green"); 
+        drawLine(selectedLetters, "lightblue"); 
       }
     }, [selectedLetters, foundWords, clearSVG, drawLine]);
 
@@ -197,9 +182,8 @@ const Grid = () => {
           }}
         />
 
-
         <div
-        style={{display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)' , gap: '8px'}}
+        style={{display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)' , gap: '25px'}}
         ref={gridRef}>
           {grid.map((row, rowIndex) =>
             row.map((letter, colIndex) => (
@@ -209,13 +193,17 @@ const Grid = () => {
                 // onClick={() => handleClick(rowIndex, colIndex)}
                 style={{
                     // backgroundColor: blinkingButton=== `${rowIndex}-${colIndex}` ? 'blue' : 'pink',
-                    backgroundColor: 'gray',
+                    backgroundColor: selectedLetters.some(
+                      (l)=>l.rowIdx === rowIndex && l.colIdx===colIndex
+                    ) ? 'lightblue' : '',
                     aspectRatio: '1',
-                    borderRadius: '15px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 'bold',
+                    borderRadius: '100%',
+                    zIndex: 1,
+                    fontSize: '25px'
                 }}
                 
                 onMouseDown={() => handleDragStart(rowIndex, colIndex)}
