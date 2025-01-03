@@ -12,7 +12,7 @@ function App() {
           </p>
         </header>
         <main className="container mx-auto px-4 py-12">
-        <div className="max-w-md bg-white max-h-lvh mx-auto rounded-xl shadow-2xl p-4 mb-10 relative overflow-hidden">
+        <div className="max-w-md bg-white max-h-lvh mx-auto rounded-xl shadow-2xl p-4 mb-2 relative overflow-hidden">
           <Grid />
         </div>
       </main>
