@@ -10,10 +10,103 @@ const Grid = () => {
     const [blinkingButton, setBlinkingButton] = useState(null);
     const grid = useMemo(() => boardData.board, []);
     const validWords = useMemo(() => wordsData.words.split(", "), []);
+    const [lines, setLines] = useState([]);
 
     const svgRef = useRef(null);
     const gridRef = useRef(null);
 
+    const getBtnPos = useCallback((rowIdx, colIdx) => {
+      if(!gridRef.current){
+        console.error("gridRef.current is undefined/null");
+        return { x: 0, y: 0, width: 0, height: 0};
+      }
+
+      const button = gridRef.current.querySelector(`#button-${rowIdx}-${colIdx}`);
+      // console.log("button: ", button);
+
+      if(!button) return { x: 0, y: 0, width: 0, height: 0};
+
+      const rect = button.getBoundingClientRect();
+      const gridRect = gridRef.current.getBoundingClientRect();
+
+      return{
+        x: rect.left - gridRect.left, y: rect.top - gridRect.top, width: rect.width, height: rect.height,
+      };
+    }, []);
+
+    const clearSVG = useCallback(() => {
+      const svg = svgRef.current;
+      if (svg) {
+        while (svg.firstChild) {
+          svg.removeChild(svg.firstChild);
+        }
+      }
+    }, []);
+
+    const drawLine = useCallback(
+      (letters, color = "blue") => {
+        const svg = svgRef.current;
+        if (!svg || !gridRef.current) return;
+  
+        clearSVG();
+  
+        letters.forEach((letter, index) => {
+          if (index === 0) return;
+          const prev = letters[index - 1];
+          const { x: x1, y: y1, width: w1, height: h1 } = getBtnPos(
+            prev.rowIdx,
+            prev.colIdx
+          );
+          const { x: x2, y: y2, width: w2, height: h2 } = getBtnPos(
+            letter.rowIdx,
+            letter.colIdx
+          );
+
+          console.log('line 61');
+          console.log(x1, x2, y1, y2);
+  
+          const line = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "line"
+          );
+          line.setAttribute("x1", String(x1 + w1 / 2));
+          line.setAttribute("y1", String(y1 + h1 / 2));
+          line.setAttribute("x2", String(x2 + w2 / 2));
+          line.setAttribute("y2", String(y2 + h2 / 2));
+          line.setAttribute("stroke", "blue");
+          line.setAttribute("stroke-width", "4");
+          line.setAttribute("stroke-linecap", "round");
+          svg.appendChild(line);
+        });
+      },
+      [getBtnPos, clearSVG]
+    );
+
+    // const drawLine = useCallback(
+    //   (letters, color = "blue") => {
+    //     const svg = svgRef.current;
+    //     if (!svg || !gridRef.current) return;
+    
+    //     letters.forEach((letter, index) => {
+    //       if (index === 0) return;
+    //       const prev = letters[index - 1];
+    //       const { x: x1, y: y1, width: w1, height: h1 } = getBtnPos(prev.rowIdx, prev.colIdx);
+    //       const { x: x2, y: y2, width: w2, height: h2 } = getBtnPos(letter.rowIdx, letter.colIdx);
+
+    //       const line = document.createElementNS("https://www.w3.org/TR/SVG/", "line");
+    //       line.setAttribute("x1", String(x1 + w1 / 2));
+    //       line.setAttribute("y1", String(y1 + h1 / 2));
+    //       line.setAttribute("x2", String(x2 + w2 / 2));
+    //       line.setAttribute("y2", String(y2 + h2 / 2));
+    //       line.setAttribute("stroke", color); // Dynamic color
+    //       line.setAttribute("stroke-width", "4");
+    //       line.setAttribute("stroke-linecap", "round");
+    //       svg.appendChild(line);
+    //     });
+    //   },
+    //   [getBtnPos]
+    // );
+  
     const isAdjacent = (prev, curr) => {
         const dx = Math.abs(prev.rowIdx - curr.rowIdx);
         const dy = Math.abs(prev.colIdx - curr.colIdx);
@@ -49,11 +142,13 @@ const Grid = () => {
                       return prev;
                     };
 
-                    return [...prev, newLetter];
+                    const updatedLetters = [...prev, newLetter];
+                    drawLine(updatedLetters);
+                    return updatedLetters;
                 });
             }
         },
-        [isDragging, grid]
+        [isDragging, grid, drawLine]
     );
 
     const handleDragEnd = () => {
@@ -75,26 +170,46 @@ const Grid = () => {
         setSelectedLetters([]);
     };
 
-    const handleClick = (rowIndex, colIndex) => {
-      setBlinkingButton(`${rowIndex}-${colIndex}`);
-      setTimeout(()=>{
-        setBlinkingButton(null)
-      }, 100); 
-    };
+    useEffect(() => {
+      clearSVG();
+    
+      foundWords.forEach((fw) => {
+        drawLine(fw.letters, "blue"); 
+      });
+
+      if (selectedLetters.length >= 2) {
+        drawLine(selectedLetters, "green"); 
+      }
+    }, [selectedLetters, foundWords, clearSVG, drawLine]);
+
 
     return (
       <div className="relative">
-        {/* Adjust grid styles to dynamically use the number of columns based on board data */}
+        <svg
+          ref={svgRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            pointerEvents: 'none',
+            width: '100%',
+            height: '100%',
+          }}
+        />
+
+
         <div
         style={{display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)' , gap: '8px'}}
         ref={gridRef}>
           {grid.map((row, rowIndex) =>
             row.map((letter, colIndex) => (
               <button
+                id={`button-${rowIndex}-${colIndex}`}
                 key={`${rowIndex}-${colIndex}`}
-                onClick={() => handleClick(rowIndex, colIndex)}
+                // onClick={() => handleClick(rowIndex, colIndex)}
                 style={{
-                    backgroundColor: blinkingButton=== `${rowIndex}-${colIndex}` ? 'blue' : 'pink',
+                    // backgroundColor: blinkingButton=== `${rowIndex}-${colIndex}` ? 'blue' : 'pink',
+                    backgroundColor: 'gray',
                     aspectRatio: '1',
                     borderRadius: '15px',
                     display: 'flex',
@@ -110,22 +225,6 @@ const Grid = () => {
             >
                 {letter}
             </button>
-              // <button
-              //   key={`${rowIndex}-${colIndex}`}
-              //   className={`rounded-full flex items-center justify-center border-0 hover:bg-gray-300 transition-colors duration-100 ease-in-out aspect-square text-sm sm:text-base md:text-lg font-bold p-0 z-20 relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 ${
-              //     selectedLetters.some(
-              //       (l) => l.rowIdx === rowIndex && l.colIdx === colIndex
-              //     )
-              //       ? 'bg-green-500'
-              //       : 'bg-gray-200'
-              //   }`}
-              //   onMouseDown={() => handleDragStart(rowIndex, colIndex)}
-              //   onMouseEnter={() => handleDrag(rowIndex, colIndex)}
-              //   onMouseUp={handleDragEnd}
-              //   aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
-              // >
-              //   {letter}
-              // </button>
             ))
           )}
         </div>
