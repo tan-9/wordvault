@@ -2,9 +2,8 @@ import React, {useState, useRef, useEffect, useCallback, useMemo} from "react";
 import boardData from '../data/board.json';
 import wordsData from '../data/words.json';
 
-const Grid = () => {
+const Grid = ({selectedLetters, setSelectedLetters}) => {
     const [selectedPath, setSelectedPath] = useState([]);
-    const [selectedLetters, setSelectedLetters] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const [foundWords, setFoundWords] = useState([]);
     const [blinkingButton, setBlinkingButton] = useState(null);
@@ -181,7 +180,6 @@ const Grid = () => {
             height: '100%',
           }}
         />
-
         <div
         style={{display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)' , gap: '25px'}}
         ref={gridRef}>
@@ -222,38 +220,3 @@ const Grid = () => {
 }
 
 export default Grid;
-
-// import React from "react";
-// import boardData from '../data/board.json';
-
-// const Grid = () => {
-//     // Simple debugging check
-//     console.log("Board data:", boardData);
-    
-//     return (
-//         <div className="border-2 border-red-500 m-4">
-//             <div style={{display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px'}}>
-//                 {boardData.board.map((row, rowIdx) =>
-//                     row.map((letter, colIdx) => (
-//                         <button
-//                             key={`${rowIdx}-${colIdx}`}
-//                             style={{
-//                                 backgroundColor: '#f3f4f6',
-//                                 aspectRatio: '1',
-//                                 borderRadius: '8px',
-//                                 display: 'flex',
-//                                 alignItems: 'center',
-//                                 justifyContent: 'center',
-//                                 fontWeight: 'bold'
-//                             }}
-//                         >
-//                             {letter}
-//                         </button>
-//                     ))
-//                 )}
-//             </div>
-//         </div>
-//     );
-// }
-
-// export default Grid;
