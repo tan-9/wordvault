@@ -5,9 +5,11 @@ import wordsData from '../data/words.json';
 const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
     const [selectedPath, setSelectedPath] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
+    // const [foundWords, setFoundWords] = useState([]);
     const [blinkingButton, setBlinkingButton] = useState(null);
     const grid = useMemo(() => boardData.board, []);
     const validWords = useMemo(() => wordsData.words.split(", "), []);
+    const [lines, setLines] = useState([]);
 
     const svgRef = useRef(null);
     const gridRef = useRef(null);
@@ -58,6 +60,8 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
             letter.rowIdx,
             letter.colIdx
           );
+
+          // console.log('line 61');
           // console.log(x1, x2, y1, y2);
   
           const line = document.createElementNS(
@@ -184,21 +188,23 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
               <button
                 id={`button-${rowIndex}-${colIndex}`}
                 key={`${rowIndex}-${colIndex}`}
+                // onClick={() => handleClick(rowIndex, colIndex)}
                 style={{
+                    // backgroundColor: blinkingButton=== `${rowIndex}-${colIndex}` ? 'blue' : 'pink',
                     backgroundColor: selectedLetters.some(
                       (l)=>l.rowIdx === rowIndex && l.colIdx===colIndex
                     ) ? 'lightblue' : '#f7ee8f',
-                    borderRadius: '10%',
-                    padding: '3px',
                     aspectRatio: '1',
                     display: 'flex',
+                    padding: '3px',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 'bold',
+                    borderRadius: '10%',
                     zIndex: 1,
                     fontSize: '30px',
+                    transition: 'background-color 0.2s ease',
                     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
-                    transition: 'background-color 0.3s ease'
                 }}
                 
                 onMouseDown={() => handleDragStart(rowIndex, colIndex)}
