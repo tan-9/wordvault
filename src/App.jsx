@@ -8,7 +8,7 @@ function App() {
   const [foundWords, setFoundWords] = useState([]);
 
   return (
-    <div className="min-h-screen bg-indigo-100">
+    <div className="min-h-screen bg-rose-100">
   <div className="flex flex-col items-center container px-4 py-8">
     <header className="text-center mb-8">
       <h1 className="text-3xl font-bold mb-4">Word Grid Game</h1>
