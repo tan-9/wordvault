@@ -2,10 +2,10 @@ import React, {useState, useRef, useEffect, useCallback, useMemo} from "react";
 import boardData from '../data/board.json';
 import wordsData from '../data/words.json';
 
-const Grid = ({selectedLetters, setSelectedLetters}) => {
+const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
     const [selectedPath, setSelectedPath] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
-    const [foundWords, setFoundWords] = useState([]);
+    // const [foundWords, setFoundWords] = useState([]);
     const [blinkingButton, setBlinkingButton] = useState(null);
     const grid = useMemo(() => boardData.board, []);
     const validWords = useMemo(() => wordsData.words.split(", "), []);
