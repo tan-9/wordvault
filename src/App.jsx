@@ -29,7 +29,7 @@ function App() {
         </div>
       </div>
       <div className="flex flex-col items-start my-auto w-1/2">
-        <div className="mx-auto rounded-xl shadow-2xl p-4 mb-2 relative overflow-hidden">
+        <div className="mx-auto rounded-xl text-lg px-10 shadow-2xl p-4 overflow-hidden">
           <DisplayFormedWords foundWords={foundWords} />
         </div>
       </div>

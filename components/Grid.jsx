@@ -8,7 +8,7 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
     // const [foundWords, setFoundWords] = useState([]);
     const [blinkingButton, setBlinkingButton] = useState(null);
     const grid = useMemo(() => boardData.board, []);
-    const validWords = useMemo(() => wordsData.words.split(", "), []);
+    const [validWords, setValidWords] = useState([]);
     const [lines, setLines] = useState([]);
 
     const svgRef = useRef(null);
@@ -204,7 +204,7 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
                     zIndex: 1,
                     fontSize: '30px',
                     transition: 'background-color 0.2s ease',
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
                 }}
                 
                 onMouseDown={() => handleDragStart(rowIndex, colIndex)}
