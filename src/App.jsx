@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import Grid from "../components/Grid.jsx";
 import Display from "../components/Display.jsx"
 import DisplayFormedWords from "../components/DisplayFormedWords.jsx";
+import Timer from "../components/Timer.jsx"
 
 function App() {
   const [selectedLetters, setSelectedLetters] = useState([]);
@@ -16,6 +17,9 @@ function App() {
         Drag to connect letters and form words!
       </p>
     </header>
+    <div className="mb-4">
+      <Timer />
+    </div>
     <div className="bg-white rounded-2xl shadow-2xl px-24 py-3 pb-6">
 
     <div className="flex justify-between container space-x-20 w-full"> 
