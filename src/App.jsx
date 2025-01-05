@@ -16,20 +16,20 @@ function App() {
         Drag to connect letters and form words!
       </p>
     </header>
-    <div className="bg-white rounded-2xl px-24 py-3 pb-6">
+    <div className="bg-white rounded-2xl shadow-2xl px-24 py-3 pb-6">
 
     <div className="flex justify-between container space-x-20 w-full"> 
       <div className="flex flex-col items-start w-1/2"> 
         <div className="h-12 text-2xl text-center tracking-wider items-center align-middle mx-auto relative overflow-hidden">
           <Display displayLetters={selectedLetters} />
         </div>
-        <div className="max-w-xl items-center bg-slate-100 max-h-lvh rounded-xl shadow-2xl p-4 mb-2 relative overflow-hidden">
+        <div className="max-w-xl items-center bg-green-50 max-h-lvh rounded-xl shadow-2xl p-4 mb-2 relative overflow-hidden">
           <Grid selectedLetters={selectedLetters} setSelectedLetters={setSelectedLetters}
           foundWords={foundWords} setFoundWords={setFoundWords} />
         </div>
       </div>
       <div className="flex flex-col items-start my-auto w-1/2">
-        <div className="mx-auto rounded-xl text-lg px-10 shadow-2xl p-4 overflow-hidden">
+        <div className="mx-auto bg-green-50 rounded-xl text-lg px-10 shadow-2xl p-4 overflow-hidden">
           <DisplayFormedWords foundWords={foundWords} />
         </div>
       </div>

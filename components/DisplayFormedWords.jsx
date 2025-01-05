@@ -2,8 +2,7 @@ import React, {useState, useRef, useEffect, useCallback, useMemo} from "react";
 
 const DisplayFormedWords = ({foundWords}) => {
     const [validWords, setValidWords] = useState([]);
-    console.log(foundWords);
-
+    
     const validateWords = async (words) => {
         if (!Array.isArray(foundWords)) return;
         const result = await Promise.all(
@@ -22,7 +21,8 @@ const DisplayFormedWords = ({foundWords}) => {
             })
         );
 
-        setValidWords(result)
+        const validWord = result.filter(({valid})=>valid).map(({word}) => word);
+        setValidWords(validWord);
     };
 
     useEffect(()=>{
@@ -33,10 +33,9 @@ const DisplayFormedWords = ({foundWords}) => {
     return (
         <div className="flex flex-col justify-center items-center">
             <div className="text-lg font-bold pb-6">Found Words:</div>
-            <div className="font-bold">{validWords.map(({word, valid}, idx) => (
-                <div key={idx}
-                    className={valid ? "text-green-500" : "text-red-500"}>
-                    {word} {valid ? "" : "invalid"}
+            <div className="font-bold">{validWords.map((word, idx) => (
+                <div key={idx} className="font-bold">
+                      {word}
                 </div>
             ))}</div>
         </div>
