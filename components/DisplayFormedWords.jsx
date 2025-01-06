@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 
-const DisplayFormedWords = ({ foundWords }) => {
+const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore }) => {
     const [validWords, setValidWords] = useState([]);
-    const [totalScore, setTotalScore] = useState(0);
-
+   
     const validateLastWord = async (word) => {
         if (!word) return;
 
