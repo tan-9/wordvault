@@ -3,11 +3,30 @@ import Grid from "../components/Grid.jsx";
 import Display from "../components/Display.jsx"
 import DisplayFormedWords from "../components/DisplayFormedWords.jsx";
 import Timer from "../components/Timer.jsx"
+import DisplayScore from "../components/DisplayScore.jsx";
 
 function App() {
   const [selectedLetters, setSelectedLetters] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
   const [isTimerActive, setisTimerActive] = useState(false);
+  const [isGameplayed, setisGameplayed] = useState(false);
+  const [totalScore, setTotalScore] = useState(0);
+
+  const resetGame = () => {
+    setSelectedLetters([]);
+    setFoundWords([]);
+  };
+
+  const startNewGame = () => {
+    resetGame();
+    setisTimerActive(true);
+    setisGameplayed(true);
+  };
+
+  const stopGame = () => {
+    setisTimerActive(false);
+    setisGameplayed(true);
+  };
 
   return (
     <div className="min-h-screen bg-rose-100">
@@ -18,8 +37,8 @@ function App() {
             Drag to connect letters and form words!
           </p>
         </header>
-        <div className="mb-4 gap-2">
-          <Timer isTimerActive={isTimerActive} setisTimerActive={setisTimerActive} />
+        <div className="mb-4 gap-2 pb-3">
+          <Timer isTimerActive={isTimerActive} setisTimerActive={(isTimerActive) => isTimerActive ? startNewGame() : stopGame() } />
         </div>
         {isTimerActive && (
           <div className="bg-white rounded-2xl shadow-2xl px-24 py-3 pb-6">
@@ -35,11 +54,15 @@ function App() {
             </div>
             <div className="flex flex-col items-start my-auto w-1/2">
               <div className="mx-auto bg-green-50 rounded-xl text-lg px-10 shadow-2xl p-4 overflow-hidden">
-                <DisplayFormedWords foundWords={foundWords} />
+                <DisplayFormedWords foundWords={foundWords} totalScore={totalScore} setTotalScore={setTotalScore} />
               </div>
             </div>
           </div>
         </div>
+        )}
+
+        {isGameplayed && !isTimerActive && (
+          <div className="m-4"> <DisplayScore totalScore={totalScore}/> </div>
         )}
       </div>
     </div>
