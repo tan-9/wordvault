@@ -23,6 +23,7 @@ const Timer = ({isTimerActive, setisTimerActive}) => {
         
         else if (timeLeft === 0) {
             setisTimerActive(false); 
+            setTimeLeft(60);
         }
 
         return () => clearInterval(timer);
