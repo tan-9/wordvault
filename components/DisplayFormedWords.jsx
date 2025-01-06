@@ -44,7 +44,7 @@ const DisplayFormedWords = ({ foundWords }) => {
         <div className="flex flex-col justify-center items-center">
             <div className="flex flex-row">
                 <div className="text-md font-bold pb-8 pr-2">Total Score: </div>
-                <div className="px-2">{totalScore}</div>
+                <div className="px-2" style={{paddingLeft: '10px'}}>{totalScore}</div>
             </div>
             <div className="font-bold">
                 {validWords.map(({ word, score }, idx) => (

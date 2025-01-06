@@ -1,24 +1,32 @@
 import React, { useState, useEffect } from "react";
 
-const Timer = () => {
+const Timer = ({isTimerActive, setisTimerActive}) => {
     const [timeLeft, setTimeLeft] = useState(60); 
-    const [isActive, setIsActive] = useState(false); 
+    const [isHovered, setIsHovered] = useState(false);
+
     const startTimer = () => {
-        setIsActive(true);
+        setisTimerActive(true);
+    };
+
+    const stopTimer = () => {
+        setisTimerActive(false);
+        setTimeLeft(60);
     };
 
     useEffect(() => {
         let timer;
-        if (isActive && timeLeft > 0) {
+        if (isTimerActive && timeLeft > 0) {
             timer = setInterval(() => {
                 setTimeLeft((prevTime) => prevTime - 1); 
             }, 1000);
-        } else if (timeLeft === 0) {
-            setIsActive(false); 
+        } 
+        
+        else if (timeLeft === 0) {
+            setisTimerActive(false); 
         }
 
         return () => clearInterval(timer);
-    }, [isActive, timeLeft]);
+    }, [isTimerActive, timeLeft]);
 
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
@@ -30,10 +38,26 @@ const Timer = () => {
         <div className="flex flex-col gap-2 items-center">
             <div className="text-lg font-bold p-2">Time Left: {formatTime(timeLeft)}</div>
             <button
-                onClick={startTimer}
-                className="mx-4 bg-white px-4 py-2 rounded hover:bg-blue-600"
-                disabled={isActive}>
-                Start Timer
+                onClick={isTimerActive ? stopTimer : startTimer}
+                onMouseEnter={()=> setIsHovered(true)}
+                onMouseLeave={()=> setIsHovered(false)}
+                className="rounded"
+                style={{
+                    display: 'inline-block',
+                    paddingLeft: '25px',
+                    paddingRight: '25px',
+                    paddingTop: '15px',
+                    paddingBottom: '15px',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '6px',
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
+                    borderRadius: '100px',
+                    backgroundColor: isHovered ? "rgb(135, 255, 179)" : "#c2fbd7",
+                    transform: isHovered ? "scale(1.05)" : "scale(1)",
+                    transition: "all 0.3 ease"
+                }}>
+                {isTimerActive ? "STOP" : "START"}
             </button>
         </div>
     );
