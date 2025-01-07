@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore }) => {
-    const [validWords, setValidWords] = useState([]);
-   
+const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore, validWords, setValidWords }) => {
     const validateLastWord = async (word) => {
         if (!word) return;
 
@@ -39,6 +37,11 @@ const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore }) => {
         }
     }, [foundWords]);
 
+    useEffect(()=>{
+        console.log("line 43",validWords);
+    }, [validWords]);
+
+    
     return (
         <div className="flex flex-col justify-center items-center">
             <div className="flex flex-row">

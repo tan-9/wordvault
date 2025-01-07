@@ -118,7 +118,7 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
                     };
 
                     const updatedLetters = [...prev, newLetter];
-                    console.log(updatedLetters);
+                    // console.log(updatedLetters);
                     drawLine(updatedLetters);
                     tileClick();
                     return updatedLetters;
@@ -131,7 +131,7 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
     const handleDragEnd = () => {
         setIsDragging(false);
         const formedWord = selectedLetters.map((letter) => letter.letter).join("");
-        console.log("Word formed: ", formedWord);
+        // console.log("Word formed: ", formedWord);
         setFoundWords((prev) => [...prev, formedWord]);
 
         if(validWords.includes(formedWord)){
@@ -140,18 +140,18 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
                 letters: selectedLetters,
                 isAnswer: true,
             };
-            console.log("new word", newWord);
+            // console.log("new word", newWord);
             // setFoundWords((prev) => [...prev, newWord]);
         } else{
-            console.log("Invalid Word: ", formedWord);
+            // console.log("Invalid Word: ", formedWord);
         }
 
         setSelectedLetters([]);
     };
 
-    useEffect(() => {
-      console.log("Updated foundWords: ", foundWords);
-    }, [foundWords]);
+    // useEffect(() => {
+    //   console.log("Updated foundWords: ", foundWords);
+    // }, [foundWords]);
     
     useEffect(() => {
       clearSVG();
