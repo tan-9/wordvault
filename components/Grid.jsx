@@ -120,6 +120,7 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
                     const updatedLetters = [...prev, newLetter];
                     console.log(updatedLetters);
                     drawLine(updatedLetters);
+                    tileClick();
                     return updatedLetters;
                 });
             }
@@ -166,6 +167,12 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
       }
     }, [selectedLetters, foundWords, clearSVG, drawLine]);
 
+    const tileClick = () =>{
+      const audio = new Audio ("../src/assets/tiles_click.wav");
+      audio.volume = 0.4;
+      audio.play();
+    }
+
 
     return (
       <div className="relative">
@@ -188,9 +195,7 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
               <button
                 id={`button-${rowIndex}-${colIndex}`}
                 key={`${rowIndex}-${colIndex}`}
-                // onClick={() => handleClick(rowIndex, colIndex)}
                 style={{
-                    // backgroundColor: blinkingButton=== `${rowIndex}-${colIndex}` ? 'blue' : 'pink',
                     backgroundColor: selectedLetters.some(
                       (l)=>l.rowIdx === rowIndex && l.colIdx===colIndex
                     ) ? 'lightblue' : '#f7ee8f',
@@ -207,8 +212,13 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
                     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
                 }}
                 
-                onMouseDown={() => handleDragStart(rowIndex, colIndex)}
-                onMouseEnter={() => handleDrag(rowIndex, colIndex)}
+                onMouseDown={() => {
+                  tileClick();
+                  handleDragStart(rowIndex, colIndex);
+                }}
+                onMouseEnter={() => {
+                  handleDrag(rowIndex, colIndex);
+                }}
                 onMouseUp={handleDragEnd}
                 aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
             >

@@ -15,6 +15,7 @@ function App() {
   const resetGame = () => {
     setSelectedLetters([]);
     setFoundWords([]);
+    setTotalScore(0);
   };
 
   const startNewGame = () => {

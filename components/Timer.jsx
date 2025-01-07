@@ -35,11 +35,20 @@ const Timer = ({isTimerActive, setisTimerActive}) => {
         return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
     };
 
+    const playSound = () => {
+        const audio = new Audio("../src/assets/button_click.wav");
+        audio.volume = 0.5;
+        audio.play();
+    };
+
     return (
         <div className="flex flex-col gap-2 items-center">
             <div className="text-lg font-bold p-2">Time Left: {formatTime(timeLeft)}</div>
             <button
-                onClick={isTimerActive ? stopTimer : startTimer}
+                onClick={() => {
+                    playSound();
+                    isTimerActive ? stopTimer() : startTimer();
+                }}
                 onMouseEnter={()=> setIsHovered(true)}
                 onMouseLeave={()=> setIsHovered(false)}
                 className="rounded"
