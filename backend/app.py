@@ -52,8 +52,8 @@ def create_room():
     rooms[roomId] = {"players": []}
     return jsonify({'roomId':roomId}), 201
 
-@app.route('/join-room', methods=['POST'])
-def join_room():
+@app.route('/join-game-room', methods=['POST'])
+def joinroom():
     data = request.json
     roomId = data.get("roomId")
     player = data.get("players")
