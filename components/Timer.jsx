@@ -43,7 +43,7 @@ const Timer = ({isTimerActive, setisTimerActive}) => {
 
     return (
         <div className="flex flex-col gap-2 items-center">
-            <div className="text-lg font-bold p-2">Time Left: {formatTime(timeLeft)}</div>
+            <div className="text-lg font-bold">{isTimerActive ? `Time Left: ${formatTime(timeLeft)}` : "Press Start to Begin"}</div>
             <button
                 onClick={() => {
                     playSound();

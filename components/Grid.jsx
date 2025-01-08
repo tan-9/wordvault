@@ -3,13 +3,9 @@ import boardData from '../data/board.json';
 import wordsData from '../data/words.json';
 
 const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
-    const [selectedPath, setSelectedPath] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
-    // const [foundWords, setFoundWords] = useState([]);
-    const [blinkingButton, setBlinkingButton] = useState(null);
     const grid = useMemo(() => boardData.board, []);
     const [validWords, setValidWords] = useState([]);
-    const [lines, setLines] = useState([]);
 
     const svgRef = useRef(null);
     const gridRef = useRef(null);
