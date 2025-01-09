@@ -64,21 +64,23 @@ const App = () => {
     <div className="min-h-screen flex flex-col items-center bg-stone-300">
       <div className="flex flex-col items-center px-4 py-8">
         <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">Word Grid Game</h1>
-          <p className="text-gray-600">
+          <h1 className="font-outfit font-medium text-5xl mb-4">Word Grid Game</h1>
+          <p className="font-poppins text-lg text-gray-800">
             Drag to connect letters and form words!
           </p>
         </header>
         
         {!isGameplayed && (
-          <GameRoom 
-            socket={socket}
-            isTimerActive={isTimerActive}
-            setisTimerActive={setisTimerActive}
-            hasJoinedRoom={hasJoinedRoom} 
-            setHasJoinedRoom={setHasJoinedRoom} 
-            setRoomId={setRoomId}
-          />
+          <div className="bg-white my-7 p-6 flex flex-col items-center gap-2 rounded-xl shadow-2xl">
+            <GameRoom 
+              socket={socket}
+              isTimerActive={isTimerActive}
+              setisTimerActive={setisTimerActive}
+              hasJoinedRoom={hasJoinedRoom} 
+              setHasJoinedRoom={setHasJoinedRoom} 
+              setRoomId={setRoomId}
+            />
+          </div>
         )}
 
         {isTimerActive &&  (

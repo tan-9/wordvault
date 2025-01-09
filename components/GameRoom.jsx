@@ -1,7 +1,5 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import Timer from "./Timer.jsx"
-
 
 const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedRoom, setRoomId}) => {
     const [roomId, setLocalRoomId] = useState("");
@@ -10,7 +8,15 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
     const [players, setPlayers] = useState([]); 
     const [inRoom, setInRoom] = useState(false);
     const [isCreatingRoom, setIsCreatingRoom] = useState(false); 
-    const [hasGameStarted, setHasGameStarted] = useState(false);
+
+    const currRoomId = roomId || createdRoomId;
+    const roomLink = `${window.location.origin}/room?roomId=${currRoomId}`;
+
+    const copyToclipboard = () => {
+        navigator.clipboard.writeText(roomLink)
+            .then(()=> alert("room link copied"))
+             .catch(()=> alert("failed to copy"));
+    };
 
     const createRoom = async () => {
         try {
@@ -71,10 +77,21 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
         };
     }, []);
 
+    const playSound = () => {
+        const audio = new Audio("../src/assets/button_click.wav");
+        audio.volume = 0.5;
+        audio.play();
+    };
+
 
     return (
-        <div className="bg-white p-6 flex flex-col items-center gap-2 rounded-xl shadow-2xl shadow-gray-200">
-            <div className="text-center">Start a New Game</div> 
+        <div>
+            <div className="text-center"
+                style={{
+                    paddingBottom: '10px',
+                    fontSize: '19px',
+                }}>
+                    Start a New Game</div> 
     
             {!inRoom ? (
                 <div className="flex flex-col gap-2">
@@ -82,13 +99,17 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                         type="text"
                         placeholder="Enter a username"
                         value={playerName}
-                        onChange={(e)=>setPlayerName(e.target.value)}/>
+                        onChange={(e)=>setPlayerName(e.target.value)}
+                        style={{
+                            fontSize: '18px'
+                        }}/>
                     <button
                         onClick={() => {
                             createRoom();
                             setIsCreatingRoom(true); 
                             setHasJoinedRoom(true);
                         }}
+                        disabled={!playerName}
                         style={{
                             display: 'inline-block',
                             paddingLeft: '20px',
@@ -103,6 +124,8 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                             borderRadius: '10px',
                             backgroundColor: '#c2fbd7',
                             transition: "all 0.3 ease",
+                            marginBottom: '18px',
+                            fontSize: '18px'
                         }}>
                         Create Room and Join
                     </button>
@@ -113,7 +136,10 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                                 type="text"
                                 placeholder="Have a code?"
                                 value={roomId}
-                                onChange={(e) => setLocalRoomId(e.target.value)} />
+                                onChange={(e) => setLocalRoomId(e.target.value)} 
+                                style={{
+                                    fontSize: '18px'
+                                }}/>
                             
                             <button
                                 onClick={()=>{
@@ -134,7 +160,7 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                                     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
                                     borderRadius: '10px',
                                     backgroundColor: '#c2fbd7',
-                                    transition: "all 0.3 ease",
+                                    fontSize: '18px'
                                 }}>
                                 Join Room
                             </button>
@@ -142,21 +168,24 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                     )}
                 </div>
             ) : (
-                <div>
-                    <h2>Room ID: {createdRoomId || roomId}</h2>
-                    <p>Players:</p>
-                    <ul>
-                        {players.map((p, idx) => (
-                            <li key={idx}>{p}</li> 
-                        ))}
-                    </ul>
-
+                <div className="flex flex-col gap-2">
+                    <button
+                    onClick={copyToclipboard}>
+                        <h2>Room ID: {createdRoomId || roomId}</h2>
+                    </button>
+                    <div className="p-2" style={{fontSize: '18px'}}>
+                        <h3 className="py-1">Waiting for players...</h3>
+                        <ul>
+                            {players.map((p, idx) => (
+                                <li key={idx}><i>{p}</i></li> 
+                            ))}
+                        </ul>
+                    </div>
                     <div className="flex flex-col items-center">
                         <button
                             onClick={()=>{
                                 startGame();
-                                // setHasGameStarted(true);
-                                // setisTimerActive(true);
+                                playSound();
                             }}
                             style={{
                                 display: 'inline-block',
@@ -172,7 +201,7 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                                 transition: "all 0.3 ease",
                                 backgroundColor: "#c2fbd7"
                             }}>
-                            Start Game
+                            START
                         </button>
                     </div>
                 </div>

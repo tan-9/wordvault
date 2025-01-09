@@ -4,7 +4,12 @@ export default {
     "./src/*.jsx"
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        outfit: ['"Outfit"', 'sans-serif'],
+        poppins: [' "Poppins ', 'sans-serif'],
+      }
+    },
   },
   plugins: [],
 }
