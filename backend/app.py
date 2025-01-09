@@ -108,7 +108,7 @@ def get_room(roomId):
         return jsonify({"error": "Room not found"}), 404
     return jsonify(rooms[roomId]), 200
 
-@socketio.on('start_game')
+@socketio.on('start_game') #had to add this to start the game for all users
 def on_start_game(data):
     room_id = data.get('roomId')
 
@@ -117,6 +117,28 @@ def on_start_game(data):
         emit('game_started', {}, room=room_id)  
     else:
         emit('error', {'message': 'Room not found'})
+
+@socketio.on('stop_game')
+def on_stop_game(data):
+    roomId = data.get('roomId')
+    print(roomId)
+
+    if roomId in rooms:
+        emit('game_stopped', {}, room=roomId, broadcast=True)  
+        print(f"Emitted 'game_stopped' to room {roomId}")
+    else:
+        emit('error', {'message': 'Room not found'})
+
+
+@socketio.on("connect")
+def handle_connect():
+    print("A user connected:", request.sid)
+
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    print("A user disconnected:", request.sid)
+
 
 
 def emit_full_player_list(room_id):

@@ -1,12 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { io } from "socket.io-client";
 import Timer from "./Timer.jsx"
 
-const socket = io("http://localhost:5000");
 
-const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedRoom}) => {
-    const [roomId, setRoomId] = useState("");
+const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedRoom, setRoomId}) => {
+    const [roomId, setLocalRoomId] = useState("");
     const [createdRoomId, setCreatedRoomId] = useState("");
     const [playerName, setPlayerName] = useState("");
     const [players, setPlayers] = useState([]); 
@@ -18,9 +16,9 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
         try {
             const response = await axios.post("http://localhost:5000/create-room", {player: playerName});
             setCreatedRoomId(response.data.roomId);
+            setRoomId(response.data.roomId);
             setInRoom(true);
             socket.emit("join_room", { roomId: response.data.roomId, player: playerName });
-            console.log("Room created", response.data);
             fetchPlayers(response.data.roomId);
         } catch (e) {
             console.error("Error creating room", e);
@@ -36,8 +34,9 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
             
             if(response.data.message){
                 setInRoom(true);
+                setRoomId(roomId);
                 socket.emit("join_room", { roomId: roomId, player: playerName });
-                console.log("Joined room:", response.data);
+                // console.log("Joined room:", response.data);
                 fetchPlayers(roomId);
             }
         } catch (e) {
@@ -57,7 +56,7 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
     };
 
     const startGame = () => {
-        socket.emit("start_game", {roomId});
+        socket.emit("start_game", {roomId: createdRoomId || roomId});
         // setisTimerActive(true);
         // setHasGameStarted(true);
     };
@@ -67,22 +66,11 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
             setPlayers(data.players);
         });
 
-        socket.on("game_started", ()=>{
-            setHasGameStarted(true);
-            setisTimerActive(true);
-        })
-
         return () => {
             socket.off("update_players");
-            socket.off("game_started");
         };
     }, []);
 
-    // useEffect(() => {
-    //     console.log("isTimerActive:", isTimerActive);
-    //     console.log("hasGameStarted:", hasGameStarted);
-    // }, [isTimerActive, hasGameStarted]);
-    
 
     return (
         <div className="bg-white p-6 flex flex-col items-center gap-2 rounded-xl shadow-2xl shadow-gray-200">
@@ -125,7 +113,7 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
                                 type="text"
                                 placeholder="Have a code?"
                                 value={roomId}
-                                onChange={(e) => setRoomId(e.target.value)} />
+                                onChange={(e) => setLocalRoomId(e.target.value)} />
                             
                             <button
                                 onClick={()=>{
@@ -167,8 +155,8 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
                         <button
                             onClick={()=>{
                                 startGame();
-                                setHasGameStarted(true);
-                                setisTimerActive(true);
+                                // setHasGameStarted(true);
+                                // setisTimerActive(true);
                             }}
                             style={{
                                 display: 'inline-block',

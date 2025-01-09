@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { io } from "socket.io-client";
 
-const Timer = ({isTimerActive, setisTimerActive}) => {
+const Timer = ({socket, isTimerActive, setisTimerActive, roomId}) => {
     const [timeLeft, setTimeLeft] = useState(60); 
     const [isHovered, setIsHovered] = useState(false);
-
-    const startTimer = () => {
-        setisTimerActive(true);
-    };
-
-    const stopTimer = () => {
-        setisTimerActive(false);
-        setTimeLeft(60);
-    };
 
     useEffect(() => {
         let timer;
@@ -28,8 +18,32 @@ const Timer = ({isTimerActive, setisTimerActive}) => {
         }
 
         return () => clearInterval(timer);
-    }, [isTimerActive, timeLeft]);
+    }, [isTimerActive, timeLeft, roomId]);
 
+    useEffect(()=>{
+        if(isTimerActive){
+            setTimeLeft(60);
+        }
+    }, [isTimerActive]);
+
+    const stopTimer = () => {
+        console.log({roomId});
+        socket.emit("stop_game", {roomId});
+        setTimeLeft(60);
+        // setisTimerActive(false);
+    };
+
+    useEffect(() => {
+        socket.on("game_stopped", () => {
+            console.log("Game stopped by a player");
+            setisTimerActive(false);
+            setTimeLeft(60);
+        });
+    
+        return () => {
+            socket.off("game_stopped");
+        };
+    }, []);
 
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
@@ -49,7 +63,7 @@ const Timer = ({isTimerActive, setisTimerActive}) => {
             <button
                 onClick={() => {
                     playSound();
-                    isTimerActive ? stopTimer() : startTimer();
+                    stopTimer() ;
                 }}
                 onMouseEnter={()=> setIsHovered(true)}
                 onMouseLeave={()=> setIsHovered(false)}
@@ -69,7 +83,7 @@ const Timer = ({isTimerActive, setisTimerActive}) => {
                     transform: isHovered ? "scale(1.05)" : "scale(1)",
                     transition: "all 0.3 ease"
                 }}>
-                {isTimerActive ? "STOP" : "START"}
+                STOP
             </button>
         </div>
     );
