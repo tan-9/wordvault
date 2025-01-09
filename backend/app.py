@@ -48,20 +48,28 @@ rooms = {}
 
 @app.route('/create-room', methods=['POST'])
 def create_room():
+    data = request.json
+    player = data.get("player")
+
     roomId = str(uuid.uuid4())
-    rooms[roomId] = {"players": []}
+    rooms[roomId] = {"players": [player]}
+    print(rooms[roomId]["players"])
     return jsonify({'roomId':roomId}), 201
 
 @app.route('/join-game-room', methods=['POST'])
 def joinroom():
     data = request.json
     roomId = data.get("roomId")
-    player = data.get("players")
+    player = data.get("player") #within double quotes is the key
 
     if roomId not in rooms:
         return jsonify({"error": "room not found"}), 404
     
+    if player in rooms[roomId]["players"]:
+        return jsonify({"error": "Player already in room"}), 400
+    
     rooms[roomId]["players"].append(player)
+    emit_full_player_list(roomId)
     return jsonify({"message": f"{player} joined room {roomId}"}), 200
 
 @socketio.on('join_room')
@@ -74,8 +82,11 @@ def on_join(data):
         return
     
     join_room(roomId)
-    rooms[roomId]["players"].append(player)
-    emit('player_joined', {'player_name': player}, room=roomId)
+    if player not in rooms[roomId]["players"]:
+        rooms[roomId]["players"].append(roomId)
+
+    emit_full_player_list(roomId)
+    # emit('player_joined', {'player_name': player}, room=roomId)
 
 @socketio.on('leave_room')
 def on_leave(data):
@@ -83,18 +94,23 @@ def on_leave(data):
     player = data['player']
 
     if roomId in rooms and player in rooms[roomId]["players"]:
-        emit('error', {'message': 'Room not found'})
         leave_room(roomId)
         rooms[roomId]["players"].remove(player)
-        emit('player_left', {'player_name': player}, room=roomId)
+        
+        if not rooms[roomId]["players"]:  # If room is empty, remove it
+            del rooms[roomId]
+        else:
+            emit_full_player_list(roomId)
 
-@app.route('/room/<room_id>', methods=['GET'])
+@app.route('/room/<roomId>', methods=['GET'])
 def get_room(roomId):
     if roomId not in rooms:
         return jsonify({"error": "Room not found"}), 404
     return jsonify(rooms[roomId]), 200
 
-    
+def emit_full_player_list(room_id):
+    socketio.emit('update_players', {'players': rooms[room_id]["players"]}, room=room_id)
+
 
 if __name__ == '__main__':
     # app.run(debug=True)

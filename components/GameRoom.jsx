@@ -1,73 +1,97 @@
 import axios from "axios";
-import React, {useEffect, useState} from "react";
-import {io} from "socket.io-client";
+import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import Timer from "./Timer.jsx"
 
-const socket = io("http://localhost:5000")
+const socket = io("http://localhost:5000");
 
-const GameRoom = () => {
-    const [roomId, setroomId] = useState("");
+const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedRoom}) => {
+    const [roomId, setRoomId] = useState("");
     const [createdRoomId, setCreatedRoomId] = useState("");
     const [playerName, setPlayerName] = useState("");
-    const [player, setPlayer] = useState([]);
+    const [players, setPlayers] = useState([]); 
     const [inRoom, setInRoom] = useState(false);
+    const [isCreatingRoom, setIsCreatingRoom] = useState(false); 
+    const [hasGameStarted, setHasGameStarted] = useState(false);
 
     const createRoom = async () => {
-        try{
-            const response = await axios.post("http://localhost:5000/create-room");
+        try {
+            const response = await axios.post("http://localhost:5000/create-room", {player: playerName});
             setCreatedRoomId(response.data.roomId);
             setInRoom(true);
-            socket.emit("join_room", {roomId: response.data.roomId, player: playerName});
+            socket.emit("join_room", { roomId: response.data.roomId, player: playerName });
             console.log("Room created", response.data);
-            
-        }
-
-        catch(e){
+            fetchPlayers(response.data.roomId);
+        } catch (e) {
             console.error("Error creating room", e);
         }
     };
 
     const joinRoom = async () => {
-        try{
+        try {
             const response = await axios.post("http://localhost:5000/join-game-room", {
                 roomId: roomId,
-                player: playerName
+                player: playerName,
             });
-            setInRoom(true);
-            socket.emit("join_room", {roomId: roomId, player: playerName});
-            console.log("joined room:", response.data);
-        }
-        catch(e){
-            console.error("error joining room:", e);
+            
+            if(response.data.message){
+                setInRoom(true);
+                socket.emit("join_room", { roomId: roomId, player: playerName });
+                console.log("Joined room:", response.data);
+                fetchPlayers(roomId);
+            }
+        } catch (e) {
+            console.error("Error joining room:", e);
         }
     };
 
+    const fetchPlayers = async (roomId) => {
+        try{
+            const response = await axios.get(`http://localhost:5000/room/${roomId}`);
+            setPlayers(response.data.players);
+        }
+
+        catch (e){
+            console.error("Error fetching players:", e);
+        }
+    };
+
+    const startGame = () => {
+        socket.emit("start_game", {roomId});
+        setHasGameStarted(true);
+    }
+
     useEffect(() => {
-        socket.on("player_joined", (data)=>{
-            setPlayer((prev)=>[...prev, data.playerName]);
+        socket.on("update_players", (data) => {
+            setPlayers(data.players);
         });
 
-        socket.on("player_left", (data)=>{
-            setPlayer((prev)=>prev.filter((player)=>player !== data.playerName));
-        });
+        socket.on("game_started", ()=>{
+            setHasGameStarted(true);
+        })
 
         return () => {
-            socket.off("player_joined");
-            socket.off("player_left");
-        }
+            socket.off("update_players");
+            socket.off("game_started");
+        };
     }, []);
 
-    return(
-        <div className="bg-white p-5 rounded-md shadow-2xl shadow-gray-200">
+    return (
+        <div className="bg-white p-6 flex flex-col gap-2 rounded-xl shadow-2xl shadow-gray-200">
+            <div className="text-center">Call some friends!</div>     
             {!inRoom ? (
-                <div>
-                    <input
-                    type="text"
-                    placeholder="Enter your name"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}/>
+                <div className="flex flex-col gap-2">
+                     <input 
+                        type="text"
+                        placeholder="Enter a username"
+                        value={playerName}
+                        onChange={(e)=>setPlayerName(e.target.value)}/>
                     <button
-                        onClick={createRoom}
-                        disabled={!playerName}
+                        onClick={() => {
+                            createRoom();
+                            setIsCreatingRoom(true); 
+                            setHasJoinedRoom(true);
+                        }}
                         style={{
                             display: 'inline-block',
                             paddingLeft: '20px',
@@ -81,53 +105,64 @@ const GameRoom = () => {
                             boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
                             borderRadius: '10px',
                             backgroundColor: '#c2fbd7',
-                            transition: "all 0.3 ease"
+                            transition: "all 0.3 ease",
                         }}>
                         Create New Room
                     </button>
+
+                    {!isCreatingRoom && (
+                        <div className="pt-2">
+                            <input
+                                type="text"
+                                placeholder="Have a code?"
+                                value={roomId}
+                                onChange={(e) => setRoomId(e.target.value)} />
+                            
+                            <button
+                                onClick={()=>{
+                                    joinRoom();
+                                    setHasJoinedRoom(true);
+                                }}
+                                disabled = {!playerName || !roomId}
+                                style={{
+                                    display: 'inline-block',
+                                    paddingLeft: '20px',
+                                    paddingRight: '20px',
+                                    paddingTop: '15px',
+                                    paddingBottom: '15px',
+                                    alignItems: 'center',
+                                    width: 'full',
+                                    justifyContent: 'center',
+                                    marginTop: '6px',
+                                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
+                                    borderRadius: '10px',
+                                    backgroundColor: '#c2fbd7',
+                                    transition: "all 0.3 ease",
+                                }}>
+                                Join Room
+                            </button>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div>
-
                     <h2>Room ID: {createdRoomId || roomId}</h2>
-                    <div><input
-                    type="text"
-                    placeholder="Enter Room Code"
-                    value={roomId}
-                    onChange={(e) => setroomId(e.target.value)}/>
-                    <button
-                        onClick={joinRoom}
-                        disabled={!roomId || !playerName}
-                        style={{
-                            display: 'inline-block',
-                            paddingLeft: '20px',
-                            paddingRight: '20px',
-                            paddingTop: '15px',
-                            paddingBottom: '15px',
-                            alignItems: 'center',
-                            width: 'full',
-                            justifyContent: 'center',
-                            marginTop: '6px',
-                            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
-                            borderRadius: '10px',
-                            backgroundColor: '#c2fbd7',
-                            transition: "all 0.3 ease"
-                        }}>
-                        Join Room
-                    </button>
-                        <p>Players: </p>
-                        <ul>
-                            {player.map((p, idx)=>(
-                                <li key={idx}>{player}</li>
-                            ))}
-                        </ul>
+                    <p>Players:</p>
+                    <ul>
+                        {players.map((p, idx) => (
+                            <li key={idx}>{p}</li> 
+                        ))}
+                    </ul>
+
+                    <div>
+                        <Timer isTimerActive={isTimerActive} setisTimerActive={setisTimerActive} />
                     </div>
                 </div>
-            )
-        }
+                 
+                 
+            )}
         </div>
-    )
-
-}
+    );
+};
 
 export default GameRoom;

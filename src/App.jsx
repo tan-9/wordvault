@@ -13,6 +13,7 @@ function App() {
   const [isGameplayed, setisGameplayed] = useState(false);
   const [totalScore, setTotalScore] = useState(0);
   const [validWords, setValidWords] = useState([]);
+  const [hasJoinedRoom, setHasJoinedRoom] = useState(false);
 
   const resetGame = () => {
     setSelectedLetters([]);
@@ -42,15 +43,22 @@ function App() {
           </p>
         </header>
 
-        <div className="bg-white flex flex-col justify-center items-center shadow-2xl shadow-gray-400 rounded-xl m-5">
+        {
+          !hasJoinedRoom && (
+            <div className="bg-white flex flex-col justify-center items-center shadow-2xl shadow-gray-400 rounded-xl m-5">
           <div className="gap-2 p-4">
             <Timer isTimerActive={isTimerActive} setisTimerActive={(isTimerActive) => isTimerActive ? startNewGame() : stopGame() } />
           </div>
         </div>
 
+          )
+        }
+
+        
         {
           !isGameplayed && !isTimerActive && (
-            <GameRoom />
+            <GameRoom isTimerActive={isTimerActive} setisTimerActive={(isTimerActive) => isTimerActive ? startNewGame() : stopGame() } 
+                      hasJoinedRoom={hasJoinedRoom} setHasJoinedRoom={setHasJoinedRoom} />
           )
         }
 
@@ -107,7 +115,7 @@ function App() {
                   }
                 }>
                   <div className="pl-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-5">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
                     </svg>
                   </div>
