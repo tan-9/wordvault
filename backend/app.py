@@ -108,6 +108,17 @@ def get_room(roomId):
         return jsonify({"error": "Room not found"}), 404
     return jsonify(rooms[roomId]), 200
 
+@socketio.on('start_game')
+def on_start_game(data):
+    room_id = data.get('roomId')
+
+    if room_id in rooms:
+        print(f"Game started in room: {data.get('roomId')}")
+        emit('game_started', {}, room=room_id)  
+    else:
+        emit('error', {'message': 'Room not found'})
+
+
 def emit_full_player_list(room_id):
     socketio.emit('update_players', {'players': rooms[room_id]["players"]}, room=room_id)
 

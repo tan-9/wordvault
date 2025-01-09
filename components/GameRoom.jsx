@@ -58,8 +58,9 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
 
     const startGame = () => {
         socket.emit("start_game", {roomId});
-        setHasGameStarted(true);
-    }
+        // setisTimerActive(true);
+        // setHasGameStarted(true);
+    };
 
     useEffect(() => {
         socket.on("update_players", (data) => {
@@ -68,6 +69,7 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
 
         socket.on("game_started", ()=>{
             setHasGameStarted(true);
+            setisTimerActive(true);
         })
 
         return () => {
@@ -76,9 +78,16 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
         };
     }, []);
 
+    // useEffect(() => {
+    //     console.log("isTimerActive:", isTimerActive);
+    //     console.log("hasGameStarted:", hasGameStarted);
+    // }, [isTimerActive, hasGameStarted]);
+    
+
     return (
-        <div className="bg-white p-6 flex flex-col gap-2 rounded-xl shadow-2xl shadow-gray-200">
-            <div className="text-center">Call some friends!</div>     
+        <div className="bg-white p-6 flex flex-col items-center gap-2 rounded-xl shadow-2xl shadow-gray-200">
+            <div className="text-center">Start a New Game</div> 
+    
             {!inRoom ? (
                 <div className="flex flex-col gap-2">
                      <input 
@@ -107,7 +116,7 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
                             backgroundColor: '#c2fbd7',
                             transition: "all 0.3 ease",
                         }}>
-                        Create New Room
+                        Create Room and Join
                     </button>
 
                     {!isCreatingRoom && (
@@ -154,8 +163,29 @@ const GameRoom = ({isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedR
                         ))}
                     </ul>
 
-                    <div>
-                        <Timer isTimerActive={isTimerActive} setisTimerActive={setisTimerActive} />
+                    <div className="flex flex-col items-center">
+                        <button
+                            onClick={()=>{
+                                startGame();
+                                setHasGameStarted(true);
+                                setisTimerActive(true);
+                            }}
+                            style={{
+                                display: 'inline-block',
+                                paddingLeft: '25px',
+                                paddingRight: '25px',
+                                paddingTop: '15px',
+                                paddingBottom: '15px',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginTop: '6px',
+                                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
+                                borderRadius: '100px',
+                                transition: "all 0.3 ease",
+                                backgroundColor: "#c2fbd7"
+                            }}>
+                            Start Game
+                        </button>
                     </div>
                 </div>
                  

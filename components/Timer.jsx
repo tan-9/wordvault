@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 
 const Timer = ({isTimerActive, setisTimerActive}) => {
     const [timeLeft, setTimeLeft] = useState(60); 
@@ -28,6 +29,7 @@ const Timer = ({isTimerActive, setisTimerActive}) => {
 
         return () => clearInterval(timer);
     }, [isTimerActive, timeLeft]);
+
 
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);

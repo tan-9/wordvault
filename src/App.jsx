@@ -42,29 +42,18 @@ function App() {
             Drag to connect letters and form words!
           </p>
         </header>
-
-        {
-          !hasJoinedRoom && (
-            <div className="bg-white flex flex-col justify-center items-center shadow-2xl shadow-gray-400 rounded-xl m-5">
-          <div className="gap-2 p-4">
-            <Timer isTimerActive={isTimerActive} setisTimerActive={(isTimerActive) => isTimerActive ? startNewGame() : stopGame() } />
-          </div>
-        </div>
-
-          )
-        }
-
         
         {
-          !isGameplayed && !isTimerActive && (
+          !isGameplayed && (
             <GameRoom isTimerActive={isTimerActive} setisTimerActive={(isTimerActive) => isTimerActive ? startNewGame() : stopGame() } 
                       hasJoinedRoom={hasJoinedRoom} setHasJoinedRoom={setHasJoinedRoom} />
           )
         }
 
-        {isTimerActive && (
+        {isTimerActive &&  (
           <div className="flex flex-col md:flex-row items-center justify-center space-x-4 w-full max-w-5xl bg-white shadow-xl rounded-lg p-6">
             <div className="flex justify-between container space-x-20 w-full"> 
+            <Timer isTimerActive={isTimerActive} setisTimerActive={(isTimerActive) => isTimerActive ? startNewGame() : stopGame() } />
               <div className="flex flex-col items-start w-1/2"> 
                 <div className="h-12 text-2xl text-center tracking-wider items-center align-middle mx-auto relative overflow-hidden">
                   <Display displayLetters={selectedLetters} />
