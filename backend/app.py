@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from twl06 import check
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit
+import random
+import string
 import uuid
 
 app = Flask(__name__)
@@ -51,10 +53,20 @@ def create_room():
     data = request.json
     player = data.get("player")
 
-    roomId = str(uuid.uuid4())
+    # Generate a 5-digit unique room ID
+    def generate_room_id():
+        return ''.join(random.choices(string.digits, k=5))
+
+    roomId = generate_room_id()
+
+    # Ensure roomId is unique
+    while roomId in rooms:
+        roomId = generate_room_id()
+
     rooms[roomId] = {"players": [player]}
     print(rooms[roomId]["players"])
-    return jsonify({'roomId':roomId}), 201
+    return jsonify({'roomId': roomId}), 201
+
 
 @app.route('/join-game-room', methods=['POST'])
 def joinroom():

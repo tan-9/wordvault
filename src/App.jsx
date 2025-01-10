@@ -6,6 +6,7 @@ import Timer from "../components/Timer.jsx"
 import DisplayScore from "../components/DisplayScore.jsx";
 import GameRoom from "../components/GameRoom.jsx";
 import { io } from "socket.io-client";
+import { BrowserRouter } from "react-router-dom";
 
 const socket = io("http://localhost:5000");
 
@@ -61,7 +62,8 @@ const App = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-stone-300">
+    <BrowserRouter>
+      <div className="min-h-screen flex flex-col items-center bg-stone-300">
       <div className="flex flex-col items-center px-4 py-8">
         
         {!isGameplayed && (
@@ -158,6 +160,7 @@ const App = () => {
         )}
       </div>
     </div>
+    </BrowserRouter>
   );
 };
 

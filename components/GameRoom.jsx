@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedRoom, setRoomId}) => {
     const [roomId, setLocalRoomId] = useState("");
@@ -8,9 +9,20 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
     const [players, setPlayers] = useState([]); 
     const [inRoom, setInRoom] = useState(false);
     const [isCreatingRoom, setIsCreatingRoom] = useState(false); 
+    const [joinViaLink, setJoinViaLink] = useState(false);
+    const [searchParams] = useSearchParams();
 
     const currRoomId = roomId || createdRoomId;
     const roomLink = `${window.location.origin}/room?roomId=${currRoomId}`;
+
+    useEffect(()=>{
+        const urlRoomId = searchParams.get('roomId');
+        if(urlRoomId){
+            setLocalRoomId(urlRoomId);
+            setJoinViaLink(true);
+            setIsCreatingRoom(false);
+        }
+    }, [searchParams]);
 
     const copyToclipboard = () => {
         navigator.clipboard.writeText(roomLink)
@@ -63,8 +75,6 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
 
     const startGame = () => {
         socket.emit("start_game", {roomId: createdRoomId || roomId});
-        // setisTimerActive(true);
-        // setHasGameStarted(true);
     };
 
     useEffect(() => {
@@ -103,7 +113,19 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                         style={{
                             fontSize: '18px'
                         }}/>
-                    <button
+
+                        {joinViaLink ? (
+                            <button 
+                                onClick={()=>{
+                                    joinRoom();
+                                    setHasJoinedRoom(true);
+                                }}
+                                disabled={!playerName}
+                            > Join game
+
+                            </button>
+                        ) : (
+                            <button
                         onClick={() => {
                             createRoom();
                             setIsCreatingRoom(true); 
@@ -129,6 +151,7 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                         }}>
                         Create Room and Join
                     </button>
+                        )}
 
                     {!isCreatingRoom && (
                         <div className="pt-2">
@@ -169,10 +192,16 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                 </div>
             ) : (
                 <div className="flex flex-col gap-2">
-                    <button
-                    onClick={copyToclipboard}>
-                        <h2>Room ID: {createdRoomId || roomId}</h2>
-                    </button>
+                    <div className="flex flex-row justify-center">
+                        <div style={{fontSize: '20px', marginTop: '6px'}}>Room ID: <b>{createdRoomId || roomId}</b></div>
+                        <button
+                        onClick={copyToclipboard} style={{width: '20px', marginLeft: '9px'}}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
+  <path d="M12 6a2 2 0 1 0-1.994-1.842L5.323 6.5a2 2 0 1 0 0 3l4.683 2.342a2 2 0 1 0 .67-1.342L5.995 8.158a2.03 2.03 0 0 0 0-.316L10.677 5.5c.353.311.816.5 1.323.5Z" />
+</svg>
+
+                        </button>
+                    </div>
                     <div className="p-2" style={{fontSize: '18px'}}>
                         <h3 className="py-1">Waiting for players...</h3>
                         <ul>
