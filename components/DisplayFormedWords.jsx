@@ -43,16 +43,16 @@ const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore, validWords,
 
     
     return (
-        <div className="flex flex-col justify-center items-center">
-            <div className="flex flex-row">
-                <div className="text-md font-bold pb-8 pr-2">Total Score: </div>
-                <div className="px-2" style={{paddingLeft: '10px'}}>{totalScore}</div>
+        <div className="flex flex-col justify-center items-center" style={{fontFamily: 'poppins', fontSize: '18px'}}>
+            <div className="flex flex-row" style={{marginBottom: '12px'}}>
+                <div className="text-md pb-8 pr-2">Total Score: </div>
+                <div className="px-2 font-bold" style={{paddingLeft: '10px'}}>{totalScore}</div>
             </div>
-            <div className="font-bold">
+            <div>
                 {validWords.map(({ word, score }, idx) => (
-                    <div key={idx} className="font-bold flex flex-row">
+                    <div key={idx} className="flex flex-row">
                         {word}
-                        <div className="text-right px-4">{score}</div>
+                        <div className="text-right px-4 font-bold">{score}</div>
                     </div>
                 ))}
             </div>

@@ -85,11 +85,11 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
 
 
     return (
-        <div>
+        <div style={{fontFamily: 'Poppins', marginTop: '2px'}}>
             <div className="text-center"
                 style={{
                     paddingBottom: '10px',
-                    fontSize: '19px',
+                    fontSize: '21px',
                 }}>
                     Start a New Game</div> 
     

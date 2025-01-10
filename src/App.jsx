@@ -63,15 +63,16 @@ const App = () => {
   return (
     <div className="min-h-screen flex flex-col items-center bg-stone-300">
       <div className="flex flex-col items-center px-4 py-8">
-        <header className="text-center mb-8">
-          <h1 className="font-outfit font-medium text-5xl mb-4">Word Grid Game</h1>
-          <p className="font-poppins text-lg text-gray-800">
-            Drag to connect letters and form words!
-          </p>
-        </header>
         
         {!isGameplayed && (
-          <div className="bg-white my-7 p-6 flex flex-col items-center gap-2 rounded-xl shadow-2xl">
+          <div>
+            <header className="text-center">
+              <h1 className="font-outfit font-medium text-5xl mb-4">Word Grid Game</h1>
+              <p className="font-poppins text-lg text-gray-800">
+                Drag to connect letters and form words!
+              </p>
+            </header>
+          <div className="bg-white mt-11 p-6 flex flex-col items-center gap-2 rounded-xl shadow-2xl">
             <GameRoom 
               socket={socket}
               isTimerActive={isTimerActive}
@@ -81,19 +82,15 @@ const App = () => {
               setRoomId={setRoomId}
             />
           </div>
+          </div>
         )}
 
         {isTimerActive &&  (
+            <div className="flex flex-col justify-center items-center self-center">
               <div className="flex flex-col md:flex-row items-center justify-center space-x-4 w-full max-w-5xl bg-white shadow-xl rounded-lg p-6">
                 <div className="flex justify-between container space-x-20 w-full"> 
-                <Timer 
-                  socket={socket}
-                  isTimerActive={isTimerActive} 
-                  setisTimerActive={setisTimerActive}
-                  roomId={roomId}
-                  />
                   <div className="flex flex-col items-start w-1/2"> 
-                    <div className="h-12 text-2xl text-center tracking-wider items-center align-middle mx-auto relative overflow-hidden">
+                    <div className="h-12 text-2xl text-center tracking-widest self-center justify-center ml-20 text-center align-middle overflow-hidden">
                       <Display displayLetters={selectedLetters} />
                     </div>
                     <div className="w-max p-4 rounded-lg flex bg-slate-200 flex-col items-center">
@@ -108,7 +105,7 @@ const App = () => {
                     </div>
                   </div>
                   <div className="flex flex-col items-start w-1/3 bg-green-100 p-4 rounded-lg">
-                    <h2 className="text-lg font-semibold mb-4">Words Formed:</h2>
+                    <h2 className="text-lg font-semibold mb-4 font-outfit">Words Formed:</h2>
                     <DisplayFormedWords
                       foundWords={foundWords}
                       totalScore={totalScore}
@@ -119,6 +116,15 @@ const App = () => {
                   </div>
                 </div>
               </div>
+              <div className="bg-white rounded-md my-3 p-3 w-48 flex flex-col items-center justify-center">
+                <Timer 
+                    socket={socket}
+                    isTimerActive={isTimerActive} 
+                    setisTimerActive={setisTimerActive}
+                    roomId={roomId}
+                  />
+              </div>
+            </div>
         )}
 
         {isGameplayed && !isTimerActive && (
