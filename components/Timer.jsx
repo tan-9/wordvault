@@ -59,7 +59,7 @@ const Timer = ({socket, isTimerActive, setisTimerActive, roomId}) => {
 
     return (
         <div className="flex flex-col gap-2 items-center">
-            <div className="text-lg font-bold">{isTimerActive ? `Time Left: ${formatTime(timeLeft)}` : "Press Start to Begin"}</div>
+            <div className="text-lg font-bold" style={{fontFamily: 'poppins'}}>{isTimerActive ? `Time Left: ${formatTime(timeLeft)}` : "Press Start to Begin"}</div>
             <button
                 onClick={() => {
                     playSound();
@@ -81,7 +81,8 @@ const Timer = ({socket, isTimerActive, setisTimerActive, roomId}) => {
                     borderRadius: '100px',
                     backgroundColor: isHovered ? "rgb(135, 255, 179)" : "#c2fbd7",
                     transform: isHovered ? "scale(1.05)" : "scale(1)",
-                    transition: "all 0.3 ease"
+                    transition: "all 0.3 ease",
+                    fontFamily: 'poppins'
                 }}>
                 STOP
             </button>
