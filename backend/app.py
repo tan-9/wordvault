@@ -53,13 +53,11 @@ def create_room():
     data = request.json
     player = data.get("player")
 
-    # Generate a 5-digit unique room ID
     def generate_room_id():
         return ''.join(random.choices(string.digits, k=5))
 
     roomId = generate_room_id()
 
-    # Ensure roomId is unique
     while roomId in rooms:
         roomId = generate_room_id()
 
@@ -72,7 +70,7 @@ def create_room():
 def joinroom():
     data = request.json
     roomId = data.get("roomId")
-    player = data.get("player") #within double quotes is the key
+    player = data.get("player") 
 
     if roomId not in rooms:
         return jsonify({"error": "room not found"}), 404
@@ -109,7 +107,7 @@ def on_leave(data):
         leave_room(roomId)
         rooms[roomId]["players"].remove(player)
         
-        if not rooms[roomId]["players"]:  # If room is empty, remove it
+        if not rooms[roomId]["players"]:  
             del rooms[roomId]
         else:
             emit_full_player_list(roomId)
