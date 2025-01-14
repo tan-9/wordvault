@@ -4,7 +4,11 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import random
 import string
-import uuid
+import sqlite3
+import json
+
+def get_db_connection():
+    return sqlite3.connect('gameData.db')
 
 app = Flask(__name__)
 CORS(app)
@@ -57,14 +61,17 @@ def create_room():
         return ''.join(random.choices(string.digits, k=5))
 
     roomId = generate_room_id()
+    rooms[roomId] = {"players": []}
 
-    while roomId in rooms:
-        roomId = generate_room_id()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO rooms (id, data) VALUES (?, ?)', 
+                   (roomId, json.dumps({"players": [player]})))
+    conn.commit()
+    conn.close()
 
-    rooms[roomId] = {"players": [player]}
     print(rooms[roomId]["players"])
     return jsonify({'roomId': roomId}), 201
-
 
 @app.route('/join-game-room', methods=['POST'])
 def joinroom():
@@ -72,13 +79,25 @@ def joinroom():
     roomId = data.get("roomId")
     player = data.get("player") 
 
-    if roomId not in rooms:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT data FROM rooms WHERE id = ?', (roomId,))
+    room = cursor.fetchone()
+
+    if not room:
         return jsonify({"error": "room not found"}), 404
     
-    if player in rooms[roomId]["players"]:
+    room_data = json.loads(room[0])
+
+    if player in room_data["players"]:
         return jsonify({"error": "Player already in room"}), 400
     
-    rooms[roomId]["players"].append(player)
+    room_data["players"].append(player)
+    cursor.execute('UPDATE rooms SET data = ? WHERE id = ?', 
+                   (json.dumps(room_data), roomId))
+    conn.commit()
+    conn.close()
+
     emit_full_player_list(roomId)
     return jsonify({"message": f"{player} joined room {roomId}"}), 200
 
@@ -87,13 +106,25 @@ def on_join(data):
     roomId = data['roomId']
     player = data['player']
 
-    if roomId not in rooms:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT data FROM rooms WHERE id = ?', (roomId,))
+    room = cursor.fetchone()
+
+    if not room:
         emit('error', {'message': 'Room not found'})
         return
     
+    room_data = json.loads(room[0])
+
+    if player not in room_data["players"]:
+        room_data["players"].append(player)
+        cursor.execute('UPDATE rooms SET data = ? WHERE id = ?', 
+                       (json.dumps(room_data), roomId))
+        conn.commit()
+    
+    conn.close()
     join_room(roomId)
-    if player not in rooms[roomId]["players"]:
-        rooms[roomId]["players"].append(roomId)
 
     emit_full_player_list(roomId)
     # emit('player_joined', {'player_name': player}, room=roomId)
@@ -121,12 +152,17 @@ def get_room(roomId):
 @socketio.on('start_game') #had to add this to start the game for all users
 def on_start_game(data):
     room_id = data.get('roomId')
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    if room_id in rooms:
-        print(f"Game started in room: {data.get('roomId')}")
-        emit('game_started', {}, room=room_id)  
+    cursor.execute('SELECT id FROM rooms WHERE id = ?', (room_id,))
+
+    if cursor.fetchone():
+        emit('game_started', {}, room=room_id, broadcast=True)
     else:
         emit('error', {'message': 'Room not found'})
+    
+    conn.close()
 
 @socketio.on('stop_game')
 def on_stop_game(data):
@@ -150,10 +186,17 @@ def handle_disconnect():
     print("A user disconnected:", request.sid)
 
 
-
 def emit_full_player_list(room_id):
-    socketio.emit('update_players', {'players': rooms[room_id]["players"]}, room=room_id)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT data FROM rooms WHERE id = ?', (room_id,))
+    room = cursor.fetchone()
 
+    if room:
+        room_data = json.loads(room[0])
+        socketio.emit('update_players', {'players': room_data["players"]}, room=room_id)
+
+    conn.close()
 
 if __name__ == '__main__':
     # app.run(debug=True)
