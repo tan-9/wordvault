@@ -16,8 +16,8 @@ def initialise_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         roomId TEXT,
         name TEXT,
-        words TEXT,
-        total_score INTEGER,
+        words TEXT DEFAULT '[]',
+        total_score INTEGER DEFAULT 0,
         FOREIGN KEY(room_id) REFERENCES rooms(id)
     )
     ''')
