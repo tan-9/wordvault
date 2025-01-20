@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore, validWords, setValidWords }) => {
+const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore, validWords, setValidWords, playerName, roomId }) => {
     const validateLastWord = async (word) => {
         if (!word) return;
 
@@ -10,7 +10,11 @@ const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore, validWords,
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ word }),
+                body: JSON.stringify({ 
+                    word,
+                    player: playerName,
+                    roomId: roomId
+                }),
             });
 
             const data = await response.json();
@@ -36,11 +40,6 @@ const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore, validWords,
             validateLastWord(lastWord);
         }
     }, [foundWords]);
-
-    useEffect(()=>{
-        console.log("line 43",validWords);
-    }, [validWords]);
-
     
     return (
         <div className="flex flex-col justify-center items-center" style={{fontFamily: 'poppins', fontSize: '18px'}}>

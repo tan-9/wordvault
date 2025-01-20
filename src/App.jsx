@@ -12,6 +12,7 @@ const socket = io("http://localhost:5000");
 
 const App = () => {
   const [roomId, setRoomId] = useState("");
+  const [playerName, setPlayerName] = useState("");
   const [isTimerActive, setisTimerActive] = useState(false);
   const [isGameplayed, setisGameplayed] = useState(false);
   const [hasJoinedRoom, setHasJoinedRoom] = useState(false);
@@ -60,6 +61,13 @@ const App = () => {
     };
   }, []);
 
+  const playSound = () => {
+    const audio = new Audio("./src/assets/button_click.wav");
+    audio.volume = 0.5;
+    audio.play();
+};
+
+
   return (
     <BrowserRouter>
       <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg">
@@ -76,11 +84,10 @@ const App = () => {
           <div className="bg-white mt-11 p-6 flex flex-col items-center gap-2 rounded-xl shadow-2xl">
             <GameRoom 
               socket={socket}
-              isTimerActive={isTimerActive}
-              setisTimerActive={setisTimerActive}
-              hasJoinedRoom={hasJoinedRoom} 
               setHasJoinedRoom={setHasJoinedRoom} 
               setRoomId={setRoomId}
+              playerName={playerName}
+              setPlayerName={setPlayerName}
             />
           </div>
           </div>
@@ -88,7 +95,7 @@ const App = () => {
 
         {isTimerActive &&  (
             <div className="flex flex-col justify-center items-center self-center">
-                <div className="bg-white rounded-md my-3 p-3 w-48 flex flex-col items-center justify-center">
+                <div className="bg-white rounded-md mb-3 p-3 w-48 flex flex-col items-center justify-center">
                 <Timer 
                     socket={socket}
                     isTimerActive={isTimerActive} 
@@ -104,7 +111,7 @@ const App = () => {
                     </div>
                     <div className="w-max p-4 rounded-lg flex bg-slate-200 flex-col items-center">
                       <div className="w-full">
-                        <Grid
+                      <Grid
                           selectedLetters={selectedLetters}
                           setSelectedLetters={setSelectedLetters}
                           foundWords={foundWords}
@@ -121,6 +128,8 @@ const App = () => {
                       setTotalScore={setTotalScore}
                       validWords={validWords}
                       setValidWords={setValidWords}
+                      playerName={playerName}
+                      roomId={roomId}
                     />
                   </div>
                 </div>
@@ -133,10 +142,12 @@ const App = () => {
             <DisplayScore 
               totalScore={totalScore} 
               validWords={validWords} 
-              setValidWords={setValidWords}
+              socket={socket}
+
             />
             <button
               onClick={() => {
+                playSound();
                 resetGame();
                 setisGameplayed(false);
               }}

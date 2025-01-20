@@ -30,23 +30,42 @@ def calc_score(word):
 def home():
     return "working"
 
+rooms = {}
+
 @app.route('/check_word', methods=['POST'])
 def check_word():
     global total_score
     data = request.json
     print(data)
     word = data.get('word', '')
+    player = data.get('player', '')
+    roomId = data.get('roomId', '')
+
+    if roomId not in rooms:
+        return jsonify({'error': 'Room not found'}), 404
+    
     isValid = check(word.lower())
 
     if isValid:
         score = calc_score(word)
-        total_score += score
-        print(total_score)
-    
-    print(word, " ", isValid, " ", score )
-    return jsonify({'word': word, 'is_Valid': isValid, 'score': score, 'total_score': total_score})
 
-rooms = {}
+        if player not in rooms[roomId]["words"]:
+            rooms[roomId]["words"][player] = []
+
+        if player not in rooms[roomId]["scores"]:
+            rooms[roomId]["scores"][player] = 0
+        
+        rooms[roomId]["words"][player].append({"word": word, "score": score})
+        rooms[roomId]["scores"][player] += score
+
+        return jsonify({'word': word, 'is_Valid': isValid, 'score': score, 'total_score': rooms[roomId]["scores"][player]})
+    
+    return jsonify({
+        'word': word,
+        'is_Valid': isValid,
+        'score': 0
+    })
+    
 
 @app.route('/create-room', methods=['POST'])
 def create_room():
@@ -61,8 +80,12 @@ def create_room():
     while roomId in rooms:
         roomId = generate_room_id()
 
-    rooms[roomId] = {"players": [player]}
-    print(rooms[roomId]["players"])
+    rooms[roomId] = {
+        "players": [player],
+        "words": {player: []},
+        "scores": {player: 0}
+        }
+
     return jsonify({'roomId': roomId}), 201
 
 
@@ -94,9 +117,11 @@ def on_join(data):
     join_room(roomId)
     if player not in rooms[roomId]["players"]:
         rooms[roomId]["players"].append(roomId)
+        rooms[roomId]["words"][player] = []  
+        rooms[roomId]["scores"][player] = 0
 
     emit_full_player_list(roomId)
-    # emit('player_joined', {'player_name': player}, room=roomId)
+    emit('player_joined', {'player_name': player}, room=roomId)
 
 @socketio.on('leave_room')
 def on_leave(data):
@@ -120,22 +145,26 @@ def get_room(roomId):
 
 @socketio.on('start_game') #had to add this to start the game for all users
 def on_start_game(data):
-    room_id = data.get('roomId')
+    roomId = data.get('roomId')
 
-    if room_id in rooms:
+    if roomId in rooms:
         print(f"Game started in room: {data.get('roomId')}")
-        emit('game_started', {}, room=room_id)  
+        emit('game_started', {}, room=roomId)  
     else:
         emit('error', {'message': 'Room not found'})
 
 @socketio.on('stop_game')
 def on_stop_game(data):
     roomId = data.get('roomId')
-    print(roomId)
 
     if roomId in rooms:
-        emit('game_stopped', {}, room=roomId, broadcast=True)  
-        print(f"Emitted 'game_stopped' to room {roomId}")
+        room_data = {
+            'words': rooms[roomId]["words"],
+            'scores': rooms[roomId]["scores"],
+            'players': rooms[roomId]["players"]
+        }
+        print(f"Emitted 'game_stopped' to room with room id {roomId} {room_data}")
+        emit('game_stopped', room_data, room=roomId)  
     else:
         emit('error', {'message': 'Room not found'})
 
@@ -151,8 +180,8 @@ def handle_disconnect():
 
 
 
-def emit_full_player_list(room_id):
-    socketio.emit('update_players', {'players': rooms[room_id]["players"]}, room=room_id)
+def emit_full_player_list(roomId):
+    socketio.emit('update_players', {'players': rooms[roomId]["players"]}, room=roomId)
 
 
 if __name__ == '__main__':

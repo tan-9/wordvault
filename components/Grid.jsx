@@ -57,7 +57,6 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
             letter.colIdx
           );
 
-          // console.log('line 61');
           // console.log(x1, x2, y1, y2);
   
           const line = document.createElementNS(
@@ -129,19 +128,6 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
         const formedWord = selectedLetters.map((letter) => letter.letter).join("");
         // console.log("Word formed: ", formedWord);
         setFoundWords((prev) => [...prev, formedWord]);
-
-        if(validWords.includes(formedWord)){
-            const newWord = {
-                word: formedWord,
-                letters: selectedLetters,
-                isAnswer: true,
-            };
-            // console.log("new word", newWord);
-            // setFoundWords((prev) => [...prev, newWord]);
-        } else{
-            // console.log("Invalid Word: ", formedWord);
-        }
-
         setSelectedLetters([]);
     };
 

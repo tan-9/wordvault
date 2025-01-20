@@ -2,10 +2,9 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHasJoinedRoom, setRoomId}) => {
+const GameRoom = ({socket, setHasJoinedRoom, setRoomId, playerName, setPlayerName}) => {
     const [roomId, setLocalRoomId] = useState("");
     const [createdRoomId, setCreatedRoomId] = useState("");
-    const [playerName, setPlayerName] = useState("");
     const [players, setPlayers] = useState([]); 
     const [inRoom, setInRoom] = useState(false);
     const [isCreatingRoom, setIsCreatingRoom] = useState(false); 
@@ -54,7 +53,7 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                 setInRoom(true);
                 setRoomId(roomId);
                 socket.emit("join_room", { roomId: roomId, player: playerName });
-                // console.log("Joined room:", response.data);
+                console.log("Joined room:", response.data);
                 fetchPlayers(roomId);
             }
         } catch (e) {
@@ -127,6 +126,7 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                         ) : (
                             <button
                         onClick={() => {
+                            playSound();
                             createRoom();
                             setIsCreatingRoom(true); 
                             setHasJoinedRoom(true);
@@ -166,6 +166,7 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                             
                             <button
                                 onClick={()=>{
+                                    playSound();
                                     joinRoom();
                                     setHasJoinedRoom(true);
                                 }}
@@ -213,8 +214,8 @@ const GameRoom = ({socket, isTimerActive, setisTimerActive, hasJoinedRoom, setHa
                     <div className="flex flex-col items-center">
                         <button
                             onClick={()=>{
-                                startGame();
                                 playSound();
+                                startGame();
                             }}
                             style={{
                                 display: 'inline-block',
