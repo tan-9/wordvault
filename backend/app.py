@@ -55,8 +55,10 @@ def check_word():
         if player not in rooms[roomId]["scores"]:
             rooms[roomId]["scores"][player] = 0
         
-        rooms[roomId]["words"][player].append({"word": word, "score": score})
-        rooms[roomId]["scores"][player] += score
+        if not any(w["word"] == word for w in rooms[roomId]["words"][player]):
+            word_data = {"word": word, "score": score}
+            rooms[roomId]["words"][player].append(word_data)
+            rooms[roomId]["scores"][player] += score
 
         return jsonify({'word': word, 'is_Valid': isValid, 'score': score, 'total_score': rooms[roomId]["scores"][player]})
     

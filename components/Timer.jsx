@@ -13,6 +13,7 @@ const Timer = ({socket, isTimerActive, setisTimerActive, roomId}) => {
         } 
         
         else if (timeLeft === 0) {
+            socket.emit("stop_game", {roomId});
             setisTimerActive(false); 
             setTimeLeft(60);
         }
@@ -28,9 +29,8 @@ const Timer = ({socket, isTimerActive, setisTimerActive, roomId}) => {
 
     const stopTimer = () => {
         console.log({roomId});
-        socket.emit("stop_game", {roomId: roomId});
+        socket.emit("stop_game", {roomId});
         setTimeLeft(60);
-        // setisTimerActive(false);
     };
 
     useEffect(() => {
