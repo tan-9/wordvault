@@ -4,7 +4,6 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import random
 import string
-import uuid
 
 app = Flask(__name__)
 CORS(app)
@@ -145,6 +144,20 @@ def get_room(roomId):
         return jsonify({"error": "Room not found"}), 404
     return jsonify(rooms[roomId]), 200
 
+@app.route('/game-results/<roomId>', methods=['GET'])
+def get_game_results(roomId):
+    if roomId not in rooms:
+        print(f"Room {roomId} not found")  # Add logging
+        return jsonify({"error": "Room not found"}), 404
+    print(f"Fetching game results for room {roomId}")  # Add logging
+    return jsonify({
+        'words': rooms[roomId]["words"],
+        'scores': rooms[roomId]["scores"],
+        'players': rooms[roomId]["players"]
+    })
+
+
+
 @socketio.on('start_game') #had to add this to start the game for all users
 def on_start_game(data):
     roomId = data.get('roomId')
@@ -166,7 +179,7 @@ def on_stop_game(data):
             'players': rooms[roomId]["players"]
         }
         print(f"Emitted 'game_stopped' to room with room id {roomId} {room_data}")
-        emit('game_stopped', room_data, room=roomId)  
+        emit('game_stopped', room_data, room=roomId, callback=lambda: print(f"game_stop delivered to room {roomId}"))  
     else:
         emit('error', {'message': 'Room not found'})
 

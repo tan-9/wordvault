@@ -7,6 +7,7 @@ import DisplayScore from "../components/DisplayScore.jsx";
 import GameRoom from "../components/GameRoom.jsx";
 import { io } from "socket.io-client";
 import { BrowserRouter } from "react-router-dom";
+import useAudio from "./hooks/useAudio.js";
 
 const socket = io("http://localhost:5000");
 
@@ -61,11 +62,7 @@ const App = () => {
     };
   }, []);
 
-  const playSound = () => {
-    const audio = new Audio("./src/assets/button_click.wav");
-    audio.volume = 0.5;
-    audio.play();
-};
+  const playSound = useAudio("../src/assets/button_click.wav");
 
 
   return (
@@ -143,6 +140,7 @@ const App = () => {
               totalScore={totalScore} 
               validWords={validWords} 
               socket={socket}
+              roomId={roomId}
 
             />
             <button

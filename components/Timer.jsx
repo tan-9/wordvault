@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useAudio from "../src/hooks/useAudio";
 
 const Timer = ({socket, isTimerActive, setisTimerActive, roomId}) => {
     const [timeLeft, setTimeLeft] = useState(60); 
@@ -51,11 +52,7 @@ const Timer = ({socket, isTimerActive, setisTimerActive, roomId}) => {
         return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
     };
 
-    const playSound = () => {
-        const audio = new Audio("../src/assets/button_click.wav");
-        audio.volume = 0.5;
-        audio.play();
-    };
+    const playSound = useAudio("../src/assets/button_click.wav");
 
     return (
         <div className="flex flex-col gap-2 items-center">
