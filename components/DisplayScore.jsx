@@ -1,34 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper} from "@mui/material";
+import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button} from "@mui/material";
 
 const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
     const [gameResults, setGameResults] = useState(null);
-
-    useEffect(() => {
-        if (socket) {
-            console.log('Socket connected:', socket.connected);
-        }
-    }, [socket]);
-
-    useEffect(() => {
-        if (socket) {
-            console.log("registering game stopped listener");
-            socket.on("game_stopped", (data, callback) => {
-                console.log("Game stopped data:", data);
-                setGameResults(data);
-                if(callback){
-                    console.log("callback invoked");
-                    callback();
-                }
-            });
-        }
-        return () => {
-            if (socket) {
-                console.log("cleaning up game_stopped listener");
-                socket.off("game_stopped");
-            }
-        };
-    }, [socket]);
+    const [selectedPlayer, setSelectedPlayer] = useState(null);
 
     useEffect(() => { 
         if (!gameResults && roomId) {
@@ -46,55 +21,82 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
                 .catch((err) => console.error("Error fetching game results:", err));
         }
     }, [gameResults, roomId]);
-    
+
+    const closePopup = () => setSelectedPlayer(null);
     
     useEffect(() => {
         console.log("Game results updated:", gameResults);
     }, [gameResults]);
-    
 
-    if (gameResults) {
+    if (gameResults && gameResults.players.length>1) {
         const sortedPlayers = [...gameResults.players].sort((a, b) => 
             (gameResults.scores[b] || 0) - (gameResults.scores[a] || 0)
         );
         const winner = sortedPlayers[0];
 
         return (
-            <div className="bg-white rounded-xl shadow-2xl p-6" style={{ fontFamily: "poppins" }}>
-      <div className="text-center text-xl font-bold text-green-600 mb-4">
-        {winner} wins with {gameResults.scores[winner]} points! 🎉
-      </div>
+            <div style={{ fontFamily: "poppins" }}>
+                <div className="text-center text-xl font-bold text-green-600 mb-4">
+                    {winner} wins with {gameResults.scores[winner]} points! 🎉
+                </div>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell style={{ fontWeight: "bold" }}>Player</TableCell>
-              <TableCell style={{ fontWeight: "bold" }}>Score</TableCell>
-              <TableCell style={{ fontWeight: "bold" }}>Words</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedPlayers.map((player) => (
-              <TableRow key={player}>
-                <TableCell>
-                  {player} {player === winner && "👑"}
-                </TableCell>
-                <TableCell>{gameResults.scores[player] || 0}</TableCell>
-                <TableCell>
-                  {gameResults.words[player]?.map(({ word, score }, idx) => (
-                    <span key={idx}>
-                      {word} ({score})
-                      {idx < gameResults.words[player].length - 1 && ", "}
-                    </span>
-                  ))}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+                {!selectedPlayer && (
+                    <TableContainer component={Paper}>
+                    <Table>
+                    <TableHead>
+                        <TableRow>
+                        <TableCell style={{ fontWeight: "bold" }} sx={{ fontFamily: "Poppins, Arial, sans-serif" }}>Player</TableCell>
+                        <TableCell style={{ fontWeight: "bold" }} sx={{ fontFamily: "Poppins, Arial, sans-serif" }}>Score</TableCell>
+                        <TableCell style={{ fontWeight: "bold" }} sx={{ fontFamily: "Poppins, Arial, sans-serif" }}>Words</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {sortedPlayers.map((player) => (
+                        <TableRow key={player}>
+                            <TableCell sx={{ fontFamily: "Poppins, Arial, sans-serif" }}>
+                            {player} {player === winner && "👑"}
+                            </TableCell>
+                            <TableCell sx={{ fontFamily: "Poppins, Arial, sans-serif" }}>{gameResults.scores[player] || 0}</TableCell>
+                            <TableCell>
+                                <Button
+                                onClick={()=> setSelectedPlayer(player)}
+                                variant="text" size="small">
+                                    View
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                        ))}
+                    </TableBody>
+                    </Table>
+                </TableContainer>
+                )}
+
+      
+                {selectedPlayer && (
+                    <div className="fixed inset-0 bg-black-100 bg-opacity-50 flex items-center justify-center">
+                        <div className="bg-white rounded-lg shadow-lg">
+                            <h2 className="text-xl font-bold mb-4">
+                                Words Found by <b>{selectedPlayer}</b>
+                            </h2>
+                            <ul className="space-y-2">
+                                {gameResults.words[selectedPlayer]?.map(({ word, score }, idx) => (
+                                    <li key={idx} className="text-gray-700">
+                                        {word} ({score} points)
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button
+                                onClick={closePopup}
+                                variant="text"
+                                color="secondary"
+                                className="mt-4"
+                            >
+                                Close
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </div>
         );
     }
 

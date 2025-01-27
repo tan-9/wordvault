@@ -68,7 +68,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg">
-      <div className="flex flex-col items-center px-4 py-8">
+      <div className="flex flex-col items-center px-4 py-4">
         
         {!isGameplayed && (
           <div>
@@ -91,7 +91,7 @@ const App = () => {
         )}
 
         {isTimerActive &&  (
-            <div className="flex flex-col justify-center items-center self-center">
+            <div className="flex flex-col justify-center items-center">
                 <div className="bg-white rounded-md mb-3 p-3 w-48 flex flex-col items-center justify-center">
                 <Timer 
                     socket={socket}
@@ -100,14 +100,14 @@ const App = () => {
                     roomId={roomId}
                   />
               </div>
-              <div className="flex flex-col md:flex-row items-center justify-center space-x-4 w-full max-w-5xl bg-white shadow-xl rounded-lg p-6">
-                <div className="flex justify-between container space-x-20 w-full"> 
+              <div className="flex flex-col items-center justify-center w-full max-w-5xl bg-white shadow-xl rounded-lg p-6">
+                <div className="flex justify-between space-x-20 w-full"> 
                   <div className="flex flex-col items-start w-1/2"> 
                     <div className="h-12 text-2xl text-center tracking-widest self-center justify-center ml-20 text-center align-middle overflow-hidden">
                       <Display displayLetters={selectedLetters} />
                     </div>
                     <div className="w-max p-4 rounded-lg flex bg-slate-200 flex-col items-center">
-                      <div className="w-full">
+                      <div>
                       <Grid
                           selectedLetters={selectedLetters}
                           setSelectedLetters={setSelectedLetters}
@@ -174,3 +174,4 @@ const App = () => {
 };
 
 export default App;
+
