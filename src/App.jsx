@@ -92,7 +92,7 @@ const App = () => {
 
         {isTimerActive &&  (
             <div className="flex flex-col justify-center items-center">
-                <div className="bg-white rounded-md mb-3 p-3 w-48 flex flex-col items-center justify-center">
+                <div className="bg-white rounded-md mt-5 mb-3 p-3 w-48 flex flex-col items-center justify-center">
                 <Timer 
                     socket={socket}
                     isTimerActive={isTimerActive} 

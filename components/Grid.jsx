@@ -1,6 +1,5 @@
 import React, {useState, useRef, useEffect, useCallback, useMemo} from "react";
 import boardData from '../data/board.json';
-import wordsData from '../data/words.json';
 
 const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
     const [isDragging, setIsDragging] = useState(false);
@@ -17,15 +16,22 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
       }
 
       const button = gridRef.current.querySelector(`#button-${rowIdx}-${colIdx}`);
-      // console.log("button: ", button);
 
       if(!button) return { x: 0, y: 0, width: 0, height: 0};
 
       const rect = button.getBoundingClientRect();
       const gridRect = gridRef.current.getBoundingClientRect();
+      const containerRect = gridRef.current.parentElement.getBoundingClientRect();
+
+      console.log("Grid Rect:", gridRef.current.getBoundingClientRect());
+      console.log("Button Rect:", button.getBoundingClientRect());
+
+      const relativeX = rect.left - containerRect.left;
+      const relativeY = rect.top - containerRect.top;
 
       return{
-        x: rect.left - gridRect.left, y: rect.top - gridRect.top, width: rect.width, height: rect.height,
+        // x: rect.left - gridRect.left, y: rect.top - gridRect.top, width: rect.width, height: rect.height
+        x: relativeX, y: relativeY, width: rect.width, height: rect.height
       };
     }, []);
 
@@ -44,6 +50,13 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
         if (!svg || !gridRef.current) return;
   
         clearSVG();
+
+        const gridRect = gridRef.current.getBoundingClientRect();
+        svg.style.width = `${gridRect.width}px`;
+        svg.style.height = `${gridRect.height}px`;
+
+        svg.setAttribute('viewBox', `0 0 ${gridRect.width} ${gridRect.height}`);
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   
         letters.forEach((letter, index) => {
           if (index === 0) return;
@@ -56,7 +69,8 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
             letter.rowIdx,
             letter.colIdx
           );
-          // console.log(x1, x2, y1, y2);
+
+          console.log(`Drawing line from (${x1}, ${y1}) to (${x2}, ${y2})`);
   
           const line = document.createElementNS(
             "http://www.w3.org/2000/svg",
@@ -113,60 +127,41 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
 
                     const updatedLetters = [...prev, newLetter];
                     // console.log(updatedLetters);
-                    drawLine(updatedLetters);
+                    // drawLine(updatedLetters);
                     tileClick();
                     return updatedLetters;
                 });
             }
         },
-        [isDragging, grid, drawLine]
+        [isDragging, grid]
     );
 
     const handleDragEnd = () => {
         setIsDragging(false);
         const formedWord = selectedLetters.map((letter) => letter.letter).join("");
-        // console.log("Word formed: ", formedWord);
         setFoundWords((prev) => [...prev, formedWord]);
-
-        if(validWords.includes(formedWord)){
-            const newWord = {
-                word: formedWord,
-                letters: selectedLetters,
-                isAnswer: true,
-            };
-            // console.log("new word", newWord);
-            // setFoundWords((prev) => [...prev, newWord]);
-        } else{
-            // console.log("Invalid Word: ", formedWord);
-        }
-
         setSelectedLetters([]);
     };
 
     // useEffect(() => {
-    //   console.log("Updated foundWords: ", foundWords);
-    // }, [foundWords]);
+    //   clearSVG();
     
-    useEffect(() => {
-      clearSVG();
-    
-      foundWords.forEach((fw) => {
-        if (fw.letters && Array.isArray(fw.letters)) {
-          drawLine(fw.letters, "blue");
-        }
-      });
+    //   foundWords.forEach((fw) => {
+    //     if (fw.letters && Array.isArray(fw.letters)) {
+    //       drawLine(fw.letters, "blue");
+    //     }
+    //   });
 
-      if (selectedLetters.length >= 2) {
-        drawLine(selectedLetters, "lightblue"); 
-      }
-    }, [selectedLetters, foundWords, clearSVG, drawLine]);
+    //   if (selectedLetters.length >= 2) {
+    //     drawLine(selectedLetters, "lightblue"); 
+    //   }
+    // }, [selectedLetters, foundWords, clearSVG, drawLine]);
 
     const tileClick = () =>{
       const audio = new Audio ("../src/assets/tiles_click.wav");
       audio.volume = 0.4;
       audio.play();
     }
-
 
     return (
       <div className="relative">
