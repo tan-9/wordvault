@@ -3,11 +3,16 @@ import boardData from '../data/board.json';
 
 const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
     const [isDragging, setIsDragging] = useState(false);
-    const grid = useMemo(() => boardData.board, []);
-    const [validWords, setValidWords] = useState([]);
+    // const grid = useMemo(() => boardData.board, []);
+    const [grid, setGrid] = useState([])
 
     const svgRef = useRef(null);
     const gridRef = useRef(null);
+
+    useEffect(() => {
+      const randomBoardIndex = Math.floor(Math.random() * boardData.boards.length);
+      setGrid(boardData.boards[randomBoardIndex]);
+    }, []);
 
     const getBtnPos = useCallback((rowIdx, colIdx) => {
       if(!gridRef.current){

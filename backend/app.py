@@ -18,16 +18,10 @@ LETTER_SCORES = {
 
 total_score = 0
 
-
 def calc_score(word):
     global total_score
     score = sum(LETTER_SCORES.get(char, 0) for char in word.lower())
     return score
-
-
-@app.route('/')
-def home():
-    return "working"
 
 rooms = {}
 
