@@ -8,7 +8,6 @@ import GameRoom from "../components/GameRoom.jsx";
 import { io } from "socket.io-client";
 import { BrowserRouter } from "react-router-dom";
 import useAudio from "./hooks/useAudio.js";
-
 const socket = io("http://localhost:5000");
 
 const App = () => {
@@ -21,6 +20,7 @@ const App = () => {
   const [foundWords, setFoundWords] = useState([]);
   const [totalScore, setTotalScore] = useState(0);
   const [validWords, setValidWords] = useState([]);
+  const [grid, setGrid] = useState([]);
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -45,8 +45,9 @@ const App = () => {
   };
 
   useEffect(() => {
-    socket.on("game_started", () => {
+    socket.on("game_started", ({grid}) => {
       resetGame();
+      setGrid(grid);
       setisTimerActive(true);
       setisGameplayed(true);
     });
@@ -62,8 +63,7 @@ const App = () => {
     };
   }, []);
 
-  const playSound = useAudio("../src/assets/button_click.wav");
-
+  const playSound = useAudio("button_click.wav");
 
   return (
     <BrowserRouter>
@@ -109,6 +109,7 @@ const App = () => {
                     <div className="w-max p-4 rounded-lg flex bg-slate-200 flex-col items-center">
                       <div>
                       <Grid
+                          grid={grid}
                           selectedLetters={selectedLetters}
                           setSelectedLetters={setSelectedLetters}
                           foundWords={foundWords}

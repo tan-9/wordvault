@@ -5,12 +5,18 @@ const useAudio = (src) => {
 
   if (!audioRef.current) {
     audioRef.current = new Audio(src);
-    audioRef.current.volume = 0.5; 
+    audioRef.current.volume = 0.5;
   }
 
   const play = () => {
-    audioRef.current.currentTime = 0; 
-    audioRef.current.play();
+    try {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch((error) => {
+        console.error("Audio play error:", error);
+      });
+    } catch (error) {
+      console.error("Audio initialization error:", error);
+    }
   };
 
   return play;
