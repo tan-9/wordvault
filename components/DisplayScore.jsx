@@ -74,7 +74,7 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
       
                 {selectedPlayer && (
                     <div className="fixed inset-0 bg-black-100 bg-opacity-50 flex items-center justify-center">
-                        <div className="bg-white rounded-lg shadow-lg">
+                        <div className="bg-white rounded-lg p-4 shadow-lg">
                             <h2 className="text-xl font-bold mb-4">
                                 Words Found by <b>{selectedPlayer}</b>
                             </h2>
@@ -88,7 +88,7 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
                             <Button
                                 onClick={closePopup}
                                 variant="text"
-                                color="secondary"
+                                color="primary"
                                 className="mt-4"
                             >
                                 Close

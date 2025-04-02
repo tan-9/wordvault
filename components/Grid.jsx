@@ -1,18 +1,11 @@
 import React, {useState, useRef, useEffect, useCallback, useMemo} from "react";
 import boardData from '../data/board.json';
 
-const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
+const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
     const [isDragging, setIsDragging] = useState(false);
-    // const grid = useMemo(() => boardData.board, []);
-    const [grid, setGrid] = useState([])
 
     const svgRef = useRef(null);
     const gridRef = useRef(null);
-
-    useEffect(() => {
-      const randomBoardIndex = Math.floor(Math.random() * boardData.boards.length);
-      setGrid(boardData.boards[randomBoardIndex]);
-    }, []);
 
     const getBtnPos = useCallback((rowIdx, colIdx) => {
       if(!gridRef.current){
@@ -31,8 +24,8 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
       console.log("Grid Rect:", gridRef.current.getBoundingClientRect());
       console.log("Button Rect:", button.getBoundingClientRect());
 
-      const relativeX = rect.left - containerRect.left;
-      const relativeY = rect.top - containerRect.top;
+      const relativeX = rect.left - gridRect.left;
+      const relativeY = rect.top - gridRect.top;
 
       return{
         // x: rect.left - gridRect.left, y: rect.top - gridRect.top, width: rect.width, height: rect.height
@@ -89,6 +82,7 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
           line.setAttribute("stroke-width", "6");
           line.setAttribute("stroke-linecap", "round");
           line.setAttribute("stroke-linejoin", "round");
+          line.style.transition = 'all 0.2s ease-in-out';
           svg.appendChild(line);
         });
       },
@@ -132,7 +126,7 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
 
                     const updatedLetters = [...prev, newLetter];
                     // console.log(updatedLetters);
-                    // drawLine(updatedLetters);
+                    drawLine(updatedLetters, "lightblue");
                     tileClick();
                     return updatedLetters;
                 });
@@ -146,30 +140,17 @@ const Grid = ({selectedLetters, setSelectedLetters, foundWords, setFoundWords}) 
         const formedWord = selectedLetters.map((letter) => letter.letter).join("");
         setFoundWords((prev) => [...prev, formedWord]);
         setSelectedLetters([]);
+        clearSVG();
     };
 
-    // useEffect(() => {
-    //   clearSVG();
-    
-    //   foundWords.forEach((fw) => {
-    //     if (fw.letters && Array.isArray(fw.letters)) {
-    //       drawLine(fw.letters, "blue");
-    //     }
-    //   });
-
-    //   if (selectedLetters.length >= 2) {
-    //     drawLine(selectedLetters, "lightblue"); 
-    //   }
-    // }, [selectedLetters, foundWords, clearSVG, drawLine]);
-
     const tileClick = () =>{
-      const audio = new Audio ("../src/assets/tiles_click.wav");
+      const audio = new Audio ("/wordvault/assets/tiles_click.wav");
       audio.volume = 0.4;
       audio.play();
     }
 
     return (
-      <div className="relative">
+      <div className="relative" style={{position: 'relative'}}>
         <svg
           ref={svgRef}
           style={{
