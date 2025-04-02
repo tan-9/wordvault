@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 
 const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore, validWords, setValidWords, playerName, roomId }) => {
+    const BACKEND_URL = "https://wordvault-backend.onrender.com";
     const validateLastWord = async (word) => {
         if (!word) return;
 
         try {
-            const response = await fetch('http://localhost:5000/check_word', {
+            const response = await fetch(`{BACKEND_URL}/check_word`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

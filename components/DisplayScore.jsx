@@ -5,9 +5,11 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
     const [gameResults, setGameResults] = useState(null);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
 
+    const BACKEND_URL = "https://wordvault-backend.onrender.com";
+
     useEffect(() => { 
         if (!gameResults && roomId) {
-            fetch(`http://localhost:5000/game-results/${roomId}`)
+            fetch(`{BACKEND_URL}/game-results/${roomId}`)
                 .then((response) => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
