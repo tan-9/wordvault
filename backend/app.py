@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit
 import random
 import string
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -201,4 +202,5 @@ def emit_full_player_list(roomId):
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    socketio.run(app, debug=True)
+    # socketio.run(app, debug=True)
+    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
