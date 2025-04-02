@@ -23,6 +23,9 @@ def calc_score(word):
     score = sum(LETTER_SCORES.get(char, 0) for char in word.lower())
     return score
 
+def generate_grid(size=6):
+    return [[random.choice(string.ascii_uppercase) for _ in range(size)] for _ in range(size)]
+
 rooms = {}
 
 @app.route('/check_word', methods=['POST'])
@@ -78,7 +81,8 @@ def create_room():
     rooms[roomId] = {
         "players": [player],
         "words": {player: []},
-        "scores": {player: 0}
+        "scores": {player: 0},
+        "grid": []
         }
 
     return jsonify({'roomId': roomId}), 201
@@ -157,8 +161,10 @@ def on_start_game(data):
     roomId = data.get('roomId')
 
     if roomId in rooms:
+        grid = generate_grid()
+        rooms[roomId]["grid"] = grid
         print(f"Game started in room: {data.get('roomId')}")
-        emit('game_started', {}, room=roomId)  
+        emit('game_started', {'grid': grid}, room=roomId)  
     else:
         emit('error', {'message': 'Room not found'})
 
