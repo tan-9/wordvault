@@ -8,7 +8,8 @@ import GameRoom from "../components/GameRoom.jsx";
 import { io } from "socket.io-client";
 import { BrowserRouter } from "react-router-dom";
 import useAudio from "./hooks/useAudio.js";
-const socket = io("http://localhost:5000");
+// const socket = io("http://localhost:5000");
+const socket = io("https://wordvault-backend.onrender.com");
 
 const App = () => {
   const [roomId, setRoomId] = useState("");

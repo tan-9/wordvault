@@ -7,7 +7,7 @@ import string
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://tan-9.github.io/wordvault/"])
 socketio = SocketIO(app, cors_allowed_origins = "*")
 
 LETTER_SCORES = {
