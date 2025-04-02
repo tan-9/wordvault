@@ -29,6 +29,11 @@ def generate_grid(size=6):
 
 rooms = {}
 
+@app.route('/')
+def index():
+    return "WordVault backend is running!"
+
+
 @app.route('/check_word', methods=['POST'])
 def check_word():
     global total_score
