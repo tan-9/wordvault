@@ -11,7 +11,7 @@ import os
 
 app = Flask(__name__)
 CORS(app, origins=["https://tan-9.github.io"])
-socketio = SocketIO(app, cors_allowed_origins = "*")
+socketio = SocketIO(app, cors_allowed_origins = ["https://tan-9.github.io"])
 
 LETTER_SCORES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4,

@@ -14,7 +14,7 @@ const GameRoom = ({socket, setHasJoinedRoom, setRoomId, playerName, setPlayerNam
     const BACKEND_URL = "https://wordvault-backend.onrender.com";
 
     const currRoomId = roomId || createdRoomId;
-    const roomLink = `${window.location.origin}/#/room?roomId=${currRoomId}`;
+    const roomLink = `${window.location.origin}/wordvault/#/room?roomId=${currRoomId}`;
 
     useEffect(()=>{
         const urlRoomId = searchParams.get('roomId');
