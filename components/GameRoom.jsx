@@ -33,7 +33,7 @@ const GameRoom = ({socket, setHasJoinedRoom, setRoomId, playerName, setPlayerNam
 
     const createRoom = async () => {
         try {
-            const response = await axios.post(`{BACKEND_URL}/create-room`, {player: playerName});
+            const response = await axios.post(`${BACKEND_URL}/create-room`, {player: playerName});
             setCreatedRoomId(response.data.roomId);
             setRoomId(response.data.roomId);
             setInRoom(true);
@@ -46,7 +46,7 @@ const GameRoom = ({socket, setHasJoinedRoom, setRoomId, playerName, setPlayerNam
 
     const joinRoom = async () => {
         try {
-            const response = await axios.post(`{BACKEND_URL}/join-game-room`, {
+            const response = await axios.post(`${BACKEND_URL}/join-game-room`, {
                 roomId: roomId,
                 player: playerName,
             });
@@ -65,7 +65,7 @@ const GameRoom = ({socket, setHasJoinedRoom, setRoomId, playerName, setPlayerNam
 
     const fetchPlayers = async (roomId) => {
         try{
-            const response = await axios.get(`{BACKEND_URL}/room/${roomId}`);
+            const response = await axios.get(`${BACKEND_URL}/room/${roomId}`);
             setPlayers(response.data.players);
         }
 

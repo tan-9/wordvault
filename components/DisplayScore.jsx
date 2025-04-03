@@ -9,7 +9,7 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
 
     useEffect(() => { 
         if (!gameResults && roomId) {
-            fetch(`{BACKEND_URL}/game-results/${roomId}`)
+            fetch(`${BACKEND_URL}/game-results/${roomId}`)
                 .then((response) => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);

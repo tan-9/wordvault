@@ -6,7 +6,7 @@ const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore, validWords,
         if (!word) return;
 
         try {
-            const response = await fetch(`{BACKEND_URL}/check_word`, {
+            const response = await fetch(`${BACKEND_URL}/check_word`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
