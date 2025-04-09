@@ -6,8 +6,7 @@ import Timer from "../components/Timer.jsx"
 import DisplayScore from "../components/DisplayScore.jsx";
 import GameRoom from "../components/GameRoom.jsx";
 import { io } from "socket.io-client";
-import { BrowserRouter } from "react-router-dom";
-import { HashRouter } from "react-router-dom";
+import { HashRouter, useNavigate, useLocation } from "react-router-dom";
 import useAudio from "./hooks/useAudio.js";
 // const socket = io("http://localhost:5000");
 const socket = io("https://wordvault-backend.onrender.com");
@@ -39,6 +38,18 @@ const App = () => {
     };
   }, []);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const isReload = performance.getEntriesByType("navigation")[0]?.type === "reload";
+    const hasRoomId = location.pathname.includes("room") || location.search.includes("roomId");
+
+    if (isReload && hasRoomId) {
+      navigate("/", { replace: true }); 
+    }
+  }, []);
+
   const resetGame = () => {
     setSelectedLetters([]);
     setFoundWords([]);
@@ -68,7 +79,7 @@ const App = () => {
   const playSound = useAudio("button_click.wav");
 
   return (
-    <HashRouter>
+    
       <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg">
       <div className="flex flex-col items-center px-4 py-4">
         
@@ -172,7 +183,7 @@ const App = () => {
         )}
       </div>
     </div>
-    </HashRouter>
+    
   );
 };
 
