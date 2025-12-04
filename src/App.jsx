@@ -8,8 +8,10 @@ import GameRoom from "../components/GameRoom.jsx";
 import { io } from "socket.io-client";
 import { HashRouter, useNavigate, useLocation } from "react-router-dom";
 import useAudio from "./hooks/useAudio.js";
-// const socket = io("http://localhost:5000");
-const socket = io("https://wordvault-backend.onrender.com");
+
+const socket = io(import.meta.env.VITE_BACKEND_URL, {
+  transports: ["websocket"],
+});
 
 const App = () => {
   const [roomId, setRoomId] = useState("");
@@ -82,7 +84,6 @@ const App = () => {
     
       <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg">
       <div className="flex flex-col items-center px-4 py-4">
-        
         {!isGameplayed && (
           <div>
             <header className="text-center">
@@ -91,7 +92,7 @@ const App = () => {
                 Drag to connect letters and form words!
               </p>
             </header>
-          <div className="bg-white mt-11 p-6 flex flex-col items-center gap-2 rounded-xl shadow-2xl">
+          <div className="bg-white shadow-lg rounded-lg mt-10">
             <GameRoom 
               socket={socket}
               setHasJoinedRoom={setHasJoinedRoom} 

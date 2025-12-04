@@ -5,13 +5,13 @@ from flask import Flask, request, jsonify
 from twl06 import check
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, leave_room, emit
+from config import Config
 import random
 import string
-import os
 
 app = Flask(__name__)
-CORS(app, origins=["https://tan-9.github.io"])
-socketio = SocketIO(app, cors_allowed_origins = ["https://tan-9.github.io"])
+CORS(app, origins=Config.ALLOWED_ORIGINS)
+socketio = SocketIO(app, cors_allowed_origins=Config.ALLOWED_ORIGINS)
 
 LETTER_SCORES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4,
@@ -207,8 +207,11 @@ def handle_disconnect():
 def emit_full_player_list(roomId):
     socketio.emit('update_players', {'players': rooms[roomId]["players"]}, room=roomId)
 
-
 if __name__ == '__main__':
-    # app.run(debug=True)
-    # socketio.run(app, debug=True)
-    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    socketio.run(app, host="0.0.0.0", port=Config.PORT, debug=Config.DEBUG)
+    
+
+# if __name__ == '__main__':
+#     # app.run(debug=True)
+#     socketio.run(app, debug=True)
+#     #socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

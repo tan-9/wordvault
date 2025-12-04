@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 const DisplayFormedWords = ({ foundWords, totalScore, setTotalScore, validWords, setValidWords, playerName, roomId }) => {
-    const BACKEND_URL = "https://wordvault-backend.onrender.com";
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+    
     const validateLastWord = async (word) => {
         if (!word) return;
 

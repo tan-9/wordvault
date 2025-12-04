@@ -5,7 +5,7 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
     const [gameResults, setGameResults] = useState(null);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
 
-    const BACKEND_URL = "https://wordvault-backend.onrender.com";
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
     useEffect(() => { 
         if (!gameResults && roomId) {
