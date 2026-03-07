@@ -37,7 +37,7 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
         const winner = sortedPlayers[0];
 
         return (
-            <div style={{ fontFamily: "poppins" }}>
+            <div style={{ fontFamily: "poppins", borderRadius: "4px" }}>
                 <div className="text-center text-xl font-bold text-green-600 mb-4">
                     {winner} wins with {gameResults.scores[winner]} points! 🎉
                 </div>
@@ -103,7 +103,7 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-2xl p-6 flex flex-col items-center" style={{fontFamily: 'poppins'}}>
+        <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center" style={{fontFamily: 'poppins'}}>
             <div>You Scored <b>{totalScore}</b> points</div>
             <div className="mx-2">
                 <hr className="pb-2 border-t border-gray-300"/>

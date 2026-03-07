@@ -12,6 +12,7 @@ import string
 app = Flask(__name__)
 CORS(app, origins=Config.ALLOWED_ORIGINS)
 socketio = SocketIO(app, cors_allowed_origins=Config.ALLOWED_ORIGINS)
+print("ALLOWED_ORIGINS:", Config.ALLOWED_ORIGINS)
 
 LETTER_SCORES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4,
@@ -41,7 +42,6 @@ def index():
 def check_word():
     global total_score
     data = request.json
-    print(data)
     word = data.get('word', '')
     player = data.get('player', '')
     roomId = data.get('roomId', '')
@@ -172,7 +172,6 @@ def on_start_game(data):
     if roomId in rooms:
         grid = generate_grid()
         rooms[roomId]["grid"] = grid
-        print(f"Game started in room: {data.get('roomId')}")
         emit('game_started', {'grid': grid}, room=roomId)  
     else:
         emit('error', {'message': 'Room not found'})

@@ -1,209 +1,225 @@
-import React, {useState, useRef, useEffect, useCallback, useMemo} from "react";
-import boardData from '../data/board.json';
+import {useState, useRef, useCallback} from "react";
 
 const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
-    const [isDragging, setIsDragging] = useState(false);
+   const [isDragging, setIsDragging] = useState(false);
+   const [currentTouchElement, setCurrentTouchElement] = useState(null);
 
-    const svgRef = useRef(null);
-    const gridRef = useRef(null);
+   const svgRef = useRef(null);
+   const gridRef = useRef(null);
+   const tileRef = useRef({});
 
-    const getBtnPos = useCallback((rowIdx, colIdx) => {
-      if(!gridRef.current){
-        console.error("gridRef.current is undefined/null");
-        return { x: 0, y: 0, width: 0, height: 0};
-      }
+   const getBtnPos = useCallback((rowIdx, colIdx) => {
+     if(!gridRef.current){
+       console.error("gridRef.current is undefined/null");
+       return { x: 0, y: 0, width: 0, height: 0};
+     }
 
-      const button = gridRef.current.querySelector(`#button-${rowIdx}-${colIdx}`);
+     const button = tileRef.current[`${rowIdx}-${colIdx}`]
 
-      if(!button) return { x: 0, y: 0, width: 0, height: 0};
+     if(!button) return { x: 0, y: 0, width: 0, height: 0};
 
-      const rect = button.getBoundingClientRect();
-      const gridRect = gridRef.current.getBoundingClientRect();
-      const containerRect = gridRef.current.parentElement.getBoundingClientRect();
+     const rect = button.getBoundingClientRect();
+     const gridRect = gridRef.current.getBoundingClientRect();
 
-      console.log("Grid Rect:", gridRef.current.getBoundingClientRect());
-      console.log("Button Rect:", button.getBoundingClientRect());
+     const relativeX = rect.left - gridRect.left;
+     const relativeY = rect.top - gridRect.top;
 
-      const relativeX = rect.left - gridRect.left;
-      const relativeY = rect.top - gridRect.top;
+     return{
+       // x: rect.left - gridRect.left, y: rect.top - gridRect.top, width: rect.width, height: rect.height
+       x: relativeX, y: relativeY, width: rect.width, height: rect.height
+     };
+   }, []);
 
-      return{
-        // x: rect.left - gridRect.left, y: rect.top - gridRect.top, width: rect.width, height: rect.height
-        x: relativeX, y: relativeY, width: rect.width, height: rect.height
-      };
-    }, []);
+   const getPolylinePoints = (letters) => {
+    if(!gridRef.current) return "";
 
-    const clearSVG = useCallback(() => {
-      const svg = svgRef.current;
-      if (svg) {
-        while (svg.firstChild) {
-          svg.removeChild(svg.firstChild);
-        }
-      }
-    }, []);
+    return letters.map((letter)=>{
+      const { x, y, width, height } = getBtnPos(letter.rowIdx, letter.colIdx);
+      return `${x + width / 2},${y + height / 2}`
+    }).join(" ")
+   }
 
-    const drawLine = useCallback(
-      (letters, color) => {
-        const svg = svgRef.current;
-        if (!svg || !gridRef.current) return;
-  
-        clearSVG();
+   const isAdjacent = (prev, curr) => {
+       const dx = Math.abs(prev.rowIdx - curr.rowIdx);
+       const dy = Math.abs(prev.colIdx - curr.colIdx);
 
-        const gridRect = gridRef.current.getBoundingClientRect();
-        svg.style.width = `${gridRect.width}px`;
-        svg.style.height = `${gridRect.height}px`;
 
-        svg.setAttribute('viewBox', `0 0 ${gridRect.width} ${gridRect.height}`);
-        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-  
-        letters.forEach((letter, index) => {
-          if (index === 0) return;
-          const prev = letters[index - 1];
-          const { x: x1, y: y1, width: w1, height: h1 } = getBtnPos(
-            prev.rowIdx,
-            prev.colIdx
-          );
-          const { x: x2, y: y2, width: w2, height: h2 } = getBtnPos(
-            letter.rowIdx,
-            letter.colIdx
-          );
+       return dx<=1 && dy<=1 && dx+dy>0;
+   }
 
-          console.log(`Drawing line from (${x1}, ${y1}) to (${x2}, ${y2})`);
-  
-          const line = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "line"
-          );
-          line.setAttribute("x1", String(x1 + w1/2));
-          line.setAttribute("y1", String(y1 + h1/2));
-          line.setAttribute("x2", String(x2 + w2/2));
-          line.setAttribute("y2", String(y2 + h2/2));
-          line.setAttribute("stroke", color);
-          line.setAttribute("stroke-width", "6");
-          line.setAttribute("stroke-linecap", "round");
-          line.setAttribute("stroke-linejoin", "round");
-          line.style.transition = 'all 0.2s ease-in-out';
-          svg.appendChild(line);
-        });
-      },
-      [getBtnPos, clearSVG]
-    );
+   const handleDragStart = useCallback(
+       (rowIdx, colIdx) => {
+           setIsDragging(true);
+           setSelectedLetters([
+               {rowIdx, colIdx, letter: grid[rowIdx][colIdx]},
+           ]);
+       },
+       [grid]
+   );
 
-    const isAdjacent = (prev, curr) => {
-        const dx = Math.abs(prev.rowIdx - curr.rowIdx);
-        const dy = Math.abs(prev.colIdx - curr.colIdx);
 
-        return dx<=1 && dy<=1 && dx+dy>0;
-    }
+   const handleDrag = useCallback(
+       (rowIdx, colIdx) => {
+           if(isDragging){
+               setSelectedLetters((prev) => {
+                   const lastLetter = prev[prev.length-1];
+                   const newLetter = {
+                       rowIdx, colIdx, letter: grid[rowIdx][colIdx],
+                   };
 
-    const handleDragStart = useCallback(
-        (rowIdx, colIdx) => {
-            setIsDragging(true);
-            setSelectedLetters([
-                {rowIdx, colIdx, letter: grid[rowIdx][colIdx]},
-            ]);
-        },
-        [grid]
-    );
 
-    const handleDrag = useCallback(
-        (rowIdx, colIdx) => {
-            if(isDragging){
-                setSelectedLetters((prev) => {
-                    const lastLetter = prev[prev.length-1];
-                    const newLetter = {
-                        rowIdx, colIdx, letter: grid[rowIdx][colIdx],
-                    };
+                   if (prev.slice(0, -1).some(letter => letter.rowIdx === rowIdx && letter.colIdx === colIdx)) {
+                       return prev;
+                   }
 
-                    if (prev.slice(0, -1).some(letter => letter.rowIdx === rowIdx && letter.colIdx === colIdx)) {
-                        return prev;
-                    }
 
-                    if(!isAdjacent(lastLetter, newLetter)){
-                      console.log("line 56");
-                      return prev;
-                    };
+                   if(!isAdjacent(lastLetter, newLetter)){
+                     console.log("line 56");
+                     return prev;
+                   };
 
-                    const updatedLetters = [...prev, newLetter];
-                    // console.log(updatedLetters);
-                    drawLine(updatedLetters, "lightblue");
-                    tileClick();
-                    return updatedLetters;
-                });
-            }
-        },
-        [isDragging, grid]
-    );
 
-    const handleDragEnd = () => {
-        setIsDragging(false);
-        const formedWord = selectedLetters.map((letter) => letter.letter).join("");
-        setFoundWords((prev) => [...prev, formedWord]);
-        setSelectedLetters([]);
-        clearSVG();
-    };
+                   const updatedLetters = [...prev, newLetter];
+                   tileClick();
+                   return updatedLetters;
+               });
+           }
+       },
+       [isDragging, grid]
+   );
 
-    const tileClick = () =>{
-      const audio = new Audio ("/wordvault/assets/tiles_click.wav");
-      audio.volume = 0.4;
-      audio.play();
-    }
 
-    return (
-      <div className="relative" style={{position: 'relative'}}>
-        <svg
-          ref={svgRef}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            pointerEvents: 'none',
-            width: '100%',
-            height: '100%',
-          }}
-        />
-        <div
-        style={{display: 'grid', gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)` , gap: '15px'}}
-        ref={gridRef}>
-          {grid.map((row, rowIndex) =>
-            row.map((letter, colIndex) => (
-              <button
-                id={`button-${rowIndex}-${colIndex}`}
-                key={`${rowIndex}-${colIndex}`}
-                style={{
-                    backgroundColor: selectedLetters.some(
-                      (l)=>l.rowIdx === rowIndex && l.colIdx===colIndex
-                    ) ? 'lightblue' : '#f7ee8f',
-                    aspectRatio: '1',
-                    display: 'flex',
-                    padding: '3px',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    borderRadius: '10%',
-                    zIndex: 1,
-                    fontSize: '30px',
-                    transition: 'background-color 0.2s ease',
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
-                }}
-                
-                onMouseDown={() => {
-                  tileClick();
-                  handleDragStart(rowIndex, colIndex);
-                }}
-                onMouseEnter={() => {
-                  handleDrag(rowIndex, colIndex);
-                }}
-                onMouseUp={handleDragEnd}
-                aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
-            >
-                {letter}
-            </button>
-            ))
-          )}
-        </div>
-      </div>
-    );
+   const handleDragEnd = () => {
+       setIsDragging(false);
+       setCurrentTouchElement(null);
+       const formedWord = selectedLetters.map((letter) => letter.letter).join("");
+       setFoundWords((prev) => [...prev, formedWord]);
+       setSelectedLetters([]);
+   };
+
+   const handleTouchStart = useCallback(
+       (e, rowIdx, colIdx) => {
+           e.preventDefault();
+           tileClick();
+           handleDragStart(rowIdx, colIdx);
+       },
+       [handleDragStart]
+   );
+
+   const handleTouchMove = useCallback(
+       (e) => {
+           if (!isDragging) return;
+           e.preventDefault();
+          
+           const touch = e.touches[0];
+           const element = document.elementFromPoint(touch.clientX, touch.clientY);
+          
+           if (element && element.id && element.id.startsWith('button-')) {
+               const [, rowIdx, colIdx] = element.id.split('-').map(Number);
+               if (!isNaN(rowIdx) && !isNaN(colIdx)) {
+                   if (currentTouchElement !== element.id) {
+                       setCurrentTouchElement(element.id);
+                       handleDrag(rowIdx, colIdx);
+                   }
+               }
+           }
+       },
+       [isDragging, currentTouchElement, grid]
+   );
+
+
+   const handleTouchEnd = useCallback(
+       (e) => {
+           e.preventDefault();
+           handleDragEnd();
+       },
+       [selectedLetters]
+   );
+
+
+   const tileClick = () =>{
+     const audio = new Audio ("/wordvault/assets/tiles_click.wav");
+     audio.volume = 0.4;
+     audio.play();
+   }
+
+
+   return (
+     <div className="relative" style={{position: 'relative', touchAction: 'none', userSelect: 'none'}}>
+       <svg
+         ref={svgRef}
+         style={{
+           position: 'absolute',
+           top: 0,
+           left: 0,
+           pointerEvents: 'none',
+           width: '100%',
+           height: '100%',
+         }}
+         >
+         {selectedLetters.length > 1 && (
+          <polyline
+          points={getPolylinePoints(selectedLetters)}
+          stroke="lightblue"
+          strokeWidth="6"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          />
+        )}
+       </svg>
+        
+       <div
+       style={{display: 'grid', gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)` , gap: 'clamp(6px, 1.5vw, 12px)', width: '100%', boxSizing: 'border-box'}}
+       ref={gridRef}>
+         {grid.map((row, rowIndex) =>
+           row.map((letter, colIndex) => (
+             <button
+             ref={(elt)=>{
+              tileRef.current[`${rowIndex}-${colIndex}`]=elt 
+             }}
+               id={`button-${rowIndex}-${colIndex}`}
+               key={`${rowIndex}-${colIndex}`}
+               style={{
+                   backgroundColor: selectedLetters.some(
+                     (l)=>l.rowIdx === rowIndex && l.colIdx===colIndex
+                   ) ? 'lightblue' : '#f7ee8f',
+                   aspectRatio: '1',
+                   display: 'flex',
+                   padding: '3px',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   fontWeight: 'bold',
+                   borderRadius: '10%',
+                   zIndex: 1,
+                   fontSize: 'clamp(20px, 5vw, 30px)',
+                   transition: 'background-color 0.2s ease',
+                   boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
+                   touchAction: 'none',
+                   WebkitTapHighlightColor: 'transparent',
+                   boxSizing: 'border-box',
+               }}
+              
+               onMouseDown={() => {
+                 tileClick();
+                 handleDragStart(rowIndex, colIndex);
+               }}
+               onMouseEnter={() => {
+                 handleDrag(rowIndex, colIndex);
+               }}
+               onMouseUp={handleDragEnd}
+               onTouchStart={(e) => handleTouchStart(e, rowIndex, colIndex)}
+               onTouchMove={handleTouchMove}
+               onTouchEnd={handleTouchEnd}
+               aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
+           >
+               {letter}
+           </button>
+           ))
+         )}
+       </div>
+     </div>
+   );
 
 }
 

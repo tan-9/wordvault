@@ -105,7 +105,7 @@ const App = () => {
         )}
 
         {isTimerActive &&  (
-            <div className="flex flex-col justify-center items-center">
+            <div className="flex flex-col justify-center items-center w-full px-2">
                 <div className="bg-white rounded-md mt-5 mb-3 p-3 w-48 flex flex-col items-center justify-center">
                 <Timer 
                     socket={socket}
@@ -114,14 +114,14 @@ const App = () => {
                     roomId={roomId}
                   />
               </div>
-              <div className="flex flex-col items-center justify-center w-full max-w-5xl bg-white shadow-xl rounded-lg p-6">
-                <div className="flex justify-between space-x-20 w-full"> 
-                  <div className="flex flex-col items-start w-1/2"> 
-                    <div className="h-12 text-2xl text-center tracking-widest self-center justify-center ml-20 text-center align-middle overflow-hidden">
+              <div className="flex flex-col items-center justify-center w-full max-w-5xl bg-white shadow-xl rounded-lg p-3 mt-8 md:p-6">
+                <div className="flex flex-col md:flex-row justify-between md:space-x-4 w-full gap-4"> 
+                  <div className="flex flex-col items-center md:items-start w-full md:w-auto md:flex-1"> 
+                    <div className="h-12 text-2xl text-center tracking-widest self-center justify-center overflow-hidden mb-2">
                       <Display displayLetters={selectedLetters} />
                     </div>
-                    <div className="w-max p-4 rounded-lg flex bg-slate-200 flex-col items-center">
-                      <div>
+                    <div className="w-full p-4 rounded-lg flex bg-slate-200 flex-col items-center overflow-hidden">
+                      <div className="w-full max-w-full justify-center">
                       <Grid
                           grid={grid}
                           selectedLetters={selectedLetters}
@@ -132,8 +132,8 @@ const App = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col items-start w-1/3 bg-green-100 p-4 rounded-lg">
-                    <h2 className="text-lg font-semibold mb-4 font-outfit">Words Formed:</h2>
+                  <div className="flex flex-col items-start w-full md:w-64 lg-w-72 bg-green-100 md:p-4 rounded-lg flex-shrink-0">
+                    <h2 className="text-base md:text-lg font-semibold mb-4 font-outfit">Words Formed:</h2>
                     <DisplayFormedWords
                       foundWords={foundWords}
                       totalScore={totalScore}
