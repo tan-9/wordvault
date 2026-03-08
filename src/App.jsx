@@ -82,7 +82,7 @@ const App = () => {
 
   return (
     
-      <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg">
+      <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg overflow-x-hidden">
       <div className="flex flex-col items-center px-4 py-4">
         {!isGameplayed && (
           <div>

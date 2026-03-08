@@ -1,4 +1,4 @@
-import {useState, useRef, useCallback} from "react";
+import {useState, useRef, useCallback, useEffect} from "react";
 
 const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
    const [isDragging, setIsDragging] = useState(false);
@@ -54,7 +54,7 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
                {rowIdx, colIdx, letter: grid[rowIdx][colIdx]},
            ]);
        },
-       [grid]
+       [grid, setSelectedLetters]
    );
 
 
@@ -85,7 +85,7 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
                });
            }
        },
-       [isDragging, grid]
+       [isDragging, grid, setSelectedLetters]
    );
 
 
@@ -124,7 +124,7 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
                }
            }
        },
-       [isDragging, currentTouchElement, grid]
+       [isDragging, currentTouchElement, handleDrag]
    );
 
 
@@ -133,7 +133,7 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
            e.preventDefault();
            handleDragEnd();
        },
-       [selectedLetters]
+       [handleDragEnd]
    );
 
 
@@ -142,6 +142,25 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
      audio.volume = 0.4;
      audio.play();
    }
+
+   useEffect(()=>{
+    const gridElement = gridRef.current;
+    if(!gridElement) {
+      return
+    }
+
+    const preventDefaultTouch = (e) => {
+      if(isDragging) {
+        e.preventDefault()
+      }
+    }
+
+    gridElement.addEventListener('touchmove', preventDefaultTouch, {passive: false})
+
+    return () => {
+      gridElement.removeEventListener('touchmove', preventDefaultTouch)
+    }
+   }, [isDragging])
 
 
    return (
