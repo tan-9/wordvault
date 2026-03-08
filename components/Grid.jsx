@@ -150,15 +150,37 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
     }
 
     const preventDefaultTouch = (e) => {
-      if(isDragging) {
-        e.preventDefault()
-      }
+      e.preventDefault();
+      e.stopPropagation();
     }
 
-    gridElement.addEventListener('touchmove', preventDefaultTouch, {passive: false})
+    gridElement.addEventListener('touchstart', preventDefaultTouch, {passive: false});
+    gridElement.addEventListener('touchmove', preventDefaultTouch, {passive: false});
+    gridElement.addEventListener('touchend', preventDefaultTouch, {passive: false});
+    
 
     return () => {
+      gridElement.removeEventListener('touchstart', preventDefaultTouch)
       gridElement.removeEventListener('touchmove', preventDefaultTouch)
+      gridElement.removeEventListener('touchend', preventDefaultTouch)
+    }
+   }, [])
+
+   useEffect(() => {
+    if(isDragging) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
    }, [isDragging])
 
