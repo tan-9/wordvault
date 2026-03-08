@@ -128,13 +128,10 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
    );
 
 
-   const handleTouchEnd = useCallback(
-       (e) => {
-           e.preventDefault();
-           handleDragEnd();
-       },
-       [handleDragEnd]
-   );
+   const handleTouchEnd = (e) => {
+      e.preventDefault();
+      handleDragEnd();
+    }
 
 
    const tileClick = () =>{
@@ -142,45 +139,16 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
      audio.volume = 0.4;
      audio.play();
    }
-
-   useEffect(()=>{
-    const gridElement = gridRef.current;
-    if(!gridElement) {
-      return
-    }
-
-    const preventDefaultTouch = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
-    gridElement.addEventListener('touchstart', preventDefaultTouch, {passive: false});
-    gridElement.addEventListener('touchmove', preventDefaultTouch, {passive: false});
-    gridElement.addEventListener('touchend', preventDefaultTouch, {passive: false});
-    
-
-    return () => {
-      gridElement.removeEventListener('touchstart', preventDefaultTouch)
-      gridElement.removeEventListener('touchmove', preventDefaultTouch)
-      gridElement.removeEventListener('touchend', preventDefaultTouch)
-    }
-   }, [])
-
+   
    useEffect(() => {
     if(isDragging) {
       document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
     } else {
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
     }
 
     return () => {
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
     }
    }, [isDragging])
 
@@ -212,7 +180,7 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
         
        <div
        style={{display: 'grid', gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)` , gap: 'clamp(6px, 1.5vw, 12px)', width: '100%', boxSizing: 'border-box'}}
-       ref={gridRef}>
+       ref={gridRef} onTouchMove={handleTouchMove}>
          {grid.map((row, rowIndex) =>
            row.map((letter, colIndex) => (
              <button
@@ -250,7 +218,6 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
                }}
                onMouseUp={handleDragEnd}
                onTouchStart={(e) => handleTouchStart(e, rowIndex, colIndex)}
-               onTouchMove={handleTouchMove}
                onTouchEnd={handleTouchEnd}
                aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
            >
