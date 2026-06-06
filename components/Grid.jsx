@@ -2,7 +2,10 @@ import {useState, useRef, useCallback, useEffect} from "react";
 
 const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWords}) => {
    const [isDragging, setIsDragging] = useState(false);
-   const [currentTouchElement, setCurrentTouchElement] = useState(null);
+
+   //refs so handlers always see current values without stale closures
+   const isDraggingRef = useRef(false);
+   const lastTileIdRef = useRef(null);
 
    const svgRef = useRef(null);
    const gridRef = useRef(null);
@@ -10,7 +13,6 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
 
    const getBtnPos = useCallback((rowIdx, colIdx) => {
      if(!gridRef.current){
-       console.error("gridRef.current is undefined/null");
        return { x: 0, y: 0, width: 0, height: 0};
      }
 
@@ -47,9 +49,17 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
        return dx<=1 && dy<=1 && dx+dy>0;
    }
 
+  const tileClick = () =>{
+     const audio = new Audio ("/wordvault/assets/tiles_click.wav");
+     audio.volume = 0.4;
+     audio.play();
+   }
+
    const handleDragStart = useCallback(
        (rowIdx, colIdx) => {
-           setIsDragging(true);
+           isDraggingRef.current = true
+           lastTileIdRef.current = `${rowIdx}-${colIdx}`
+           setIsDragging(true)
            setSelectedLetters([
                {rowIdx, colIdx, letter: grid[rowIdx][colIdx]},
            ]);
@@ -89,56 +99,53 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
    );
 
 
-   const handleDragEnd = () => {
+   const handleDragEnd = useCallback(() => {
+    if(!isDraggingRef.current) return;
+
+    isDraggingRef.current = false;
+    lastTileIdRef.current = null;
+
        setIsDragging(false);
-       setCurrentTouchElement(null);
-       const formedWord = selectedLetters.map((letter) => letter.letter).join("");
-       setFoundWords((prev) => [...prev, formedWord]);
-       setSelectedLetters([]);
-   };
 
-   const handleTouchStart = useCallback(
-       (e, rowIdx, colIdx) => {
-           e.preventDefault();
-           tileClick();
-           handleDragStart(rowIdx, colIdx);
-       },
-       [handleDragStart]
-   );
+       setSelectedLetters((prev)=>{
+        const formedWord = prev.map((l)=>l.letter).join("")
+        setFoundWords((prevWords)=>[...prevWords, formedWord])
+        return [];
+       })
+   }, [setFoundWords, setSelectedLetters]);
 
-   const handleTouchMove = useCallback(
-       (e) => {
-           if (!isDragging) return;
-           e.preventDefault();
-          
-           const touch = e.touches[0];
-           const element = document.elementFromPoint(touch.clientX, touch.clientY);
-          
-           if (element && element.id && element.id.startsWith('button-')) {
-               const [, rowIdx, colIdx] = element.id.split('-').map(Number);
-               if (!isNaN(rowIdx) && !isNaN(colIdx)) {
-                   if (currentTouchElement !== element.id) {
-                       setCurrentTouchElement(element.id);
-                       handleDrag(rowIdx, colIdx);
-                   }
-               }
-           }
-       },
-       [isDragging, currentTouchElement, handleDrag]
-   );
+   const selectTileAtPoint = useCallback(
+    (clientX, clientY) => {
+      if(!isDraggingRef.current) return;
 
+      const elt = document.elementFromPoint(clientX, clientY);
+      const button = elt?.closest('[id^="button-"]')
+      if(!button) return
 
-   const handleTouchEnd = (e) => {
-      e.preventDefault();
-      handleDragEnd();
-    }
+      if(lastTileIdRef.current === button.id) return;
+
+      const btnIdx = button.id.split('-');
+      const rowIdx = Number(btnIdx[1]);
+      const colIdx = Number(btnIdx[2]);
+
+      if(Number.isNaN(rowIdx) || Number.isNaN(colIdx)) return;
+
+      lastTileIdRef.current = button.id;
+      handleDrag(rowIdx, colIdx);
+    },
+    [handleDrag]
+   )
+
+  const handlePointerDown = useCallback((e, rowIdx, colIdx)=>{
+    gridRef.current?.setPointerCapture?.(e.pointerId);
+    tileClick();
+    handleDragStart(rowIdx, colIdx);
+  }, [handleDragStart]);
 
 
-   const tileClick = () =>{
-     const audio = new Audio ("/wordvault/assets/tiles_click.wav");
-     audio.volume = 0.4;
-     audio.play();
-   }
+  const handlePointerMove = useCallback((e)=>{
+    selectTileAtPoint(e.clientX, e.clientY)
+  }, [selectTileAtPoint])
    
    useEffect(() => {
     if(isDragging) {
@@ -180,7 +187,10 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
         
        <div
        style={{display: 'grid', gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)` , gap: 'clamp(6px, 1.5vw, 12px)', width: '100%', boxSizing: 'border-box'}}
-       ref={gridRef} onTouchMove={handleTouchMove}>
+       ref={gridRef}
+       onPointerMove={handlePointerMove}
+       onPointerUp={handleDragEnd}
+       onPointerCancel={handleDragEnd}>
          {grid.map((row, rowIndex) =>
            row.map((letter, colIndex) => (
              <button
@@ -209,16 +219,9 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
                    boxSizing: 'border-box',
                }}
               
-               onMouseDown={() => {
-                 tileClick();
-                 handleDragStart(rowIndex, colIndex);
+               onPointerDown={(e) => {
+                 handlePointerDown(e, rowIndex, colIndex)
                }}
-               onMouseEnter={() => {
-                 handleDrag(rowIndex, colIndex);
-               }}
-               onMouseUp={handleDragEnd}
-               onTouchStart={(e) => handleTouchStart(e, rowIndex, colIndex)}
-               onTouchEnd={handleTouchEnd}
                aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
            >
                {letter}
@@ -228,7 +231,6 @@ const Grid = ({grid, selectedLetters, setSelectedLetters, foundWords, setFoundWo
        </div>
      </div>
    );
-
 }
 
 export default Grid;
