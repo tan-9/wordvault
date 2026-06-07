@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import Grid from "../components/Grid.jsx";
-import Display from "../components/Display.jsx"
+import Display from "../components/Display.jsx";
 import DisplayFormedWords from "../components/DisplayFormedWords.jsx";
-import Timer from "../components/Timer.jsx"
+import Timer from "../components/Timer.jsx";
 import DisplayScore from "../components/DisplayScore.jsx";
 import GameRoom from "../components/GameRoom.jsx";
 import { io } from "socket.io-client";
@@ -44,11 +44,13 @@ const App = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const isReload = performance.getEntriesByType("navigation")[0]?.type === "reload";
-    const hasRoomId = location.pathname.includes("room") || location.search.includes("roomId");
+    const isReload =
+      performance.getEntriesByType("navigation")[0]?.type === "reload";
+    const hasRoomId =
+      location.pathname.includes("room") || location.search.includes("roomId");
 
     if (isReload && hasRoomId) {
-      navigate("/", { replace: true }); 
+      navigate("/", { replace: true });
     }
   }, []);
 
@@ -60,7 +62,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    socket.on("game_started", ({grid}) => {
+    socket.on("game_started", ({ grid }) => {
       resetGame();
       setGrid(grid);
       setisTimerActive(true);
@@ -81,82 +83,84 @@ const App = () => {
   const playSound = useAudio("button_click.wav");
 
   return (
-    
-      <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg overflow-x-hidden">
+    <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg overflow-x-hidden">
       <div className="flex flex-col items-center px-4 py-4">
         {!isGameplayed && (
           <div>
             <header className="text-center">
-              <h1 className="font-outfit font-medium text-5xl mb-4">WordVault</h1>
+              <h1 className="font-outfit font-medium text-5xl mb-4">
+                WordVault
+              </h1>
               <p className="font-poppins text-lg text-gray-800">
                 Drag to connect letters and form words!
               </p>
             </header>
-          <div className="bg-white shadow-lg rounded-lg mt-10">
-            <GameRoom 
-              socket={socket}
-              setHasJoinedRoom={setHasJoinedRoom} 
-              setRoomId={setRoomId}
-              playerName={playerName}
-              setPlayerName={setPlayerName}
-            />
-          </div>
+            <div className="bg-white shadow-lg rounded-lg mt-10">
+              <GameRoom
+                socket={socket}
+                setHasJoinedRoom={setHasJoinedRoom}
+                setRoomId={setRoomId}
+                playerName={playerName}
+                setPlayerName={setPlayerName}
+              />
+            </div>
           </div>
         )}
 
-        {isTimerActive &&  (
-            <div className="flex flex-col justify-center items-center w-full px-2">
-                <div className="bg-white rounded-md mt-5 mb-3 p-3 w-48 flex flex-col items-center justify-center">
-                <Timer 
-                    socket={socket}
-                    isTimerActive={isTimerActive} 
-                    setisTimerActive={setisTimerActive}
+        {isTimerActive && (
+          <div className="flex flex-col justify-center items-center w-full px-2">
+            <div className="bg-white rounded-md mt-5 mb-3 p-3 w-48 flex flex-col items-center justify-center">
+              <Timer
+                socket={socket}
+                isTimerActive={isTimerActive}
+                setisTimerActive={setisTimerActive}
+                roomId={roomId}
+              />
+            </div>
+            <div className="flex flex-col items-center justify-center w-full max-w-5xl bg-white shadow-xl rounded-lg p-3 mt-8 md:p-6">
+              <div className="flex flex-col md:flex-row justify-between md:space-x-4 w-full gap-4">
+                <div className="flex flex-col items-center md:items-start w-full md:w-auto md:flex-1">
+                  <div className="h-12 text-2xl text-center tracking-widest self-center justify-center overflow-hidden mb-2">
+                    <Display displayLetters={selectedLetters} />
+                  </div>
+                  <div className="w-full p-4 rounded-lg flex bg-slate-200 flex-col items-center overflow-hidden">
+                    <div className="w-full max-w-full justify-center">
+                      <Grid
+                        grid={grid}
+                        selectedLetters={selectedLetters}
+                        setSelectedLetters={setSelectedLetters}
+                        foundWords={foundWords}
+                        setFoundWords={setFoundWords}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-start w-full md:w-64 lg-w-72 bg-green-100 md:p-4 rounded-lg flex-shrink-0">
+                  <h2 className="text-base md:text-lg font-semibold mb-4 font-outfit">
+                    Words Formed:
+                  </h2>
+                  <DisplayFormedWords
+                    foundWords={foundWords}
+                    totalScore={totalScore}
+                    setTotalScore={setTotalScore}
+                    validWords={validWords}
+                    setValidWords={setValidWords}
+                    playerName={playerName}
                     roomId={roomId}
                   />
-              </div>
-              <div className="flex flex-col items-center justify-center w-full max-w-5xl bg-white shadow-xl rounded-lg p-3 mt-8 md:p-6">
-                <div className="flex flex-col md:flex-row justify-between md:space-x-4 w-full gap-4"> 
-                  <div className="flex flex-col items-center md:items-start w-full md:w-auto md:flex-1"> 
-                    <div className="h-12 text-2xl text-center tracking-widest self-center justify-center overflow-hidden mb-2">
-                      <Display displayLetters={selectedLetters} />
-                    </div>
-                    <div className="w-full p-4 rounded-lg flex bg-slate-200 flex-col items-center overflow-hidden">
-                      <div className="w-full max-w-full justify-center">
-                      <Grid
-                          grid={grid}
-                          selectedLetters={selectedLetters}
-                          setSelectedLetters={setSelectedLetters}
-                          foundWords={foundWords}
-                          setFoundWords={setFoundWords}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-start w-full md:w-64 lg-w-72 bg-green-100 md:p-4 rounded-lg flex-shrink-0">
-                    <h2 className="text-base md:text-lg font-semibold mb-4 font-outfit">Words Formed:</h2>
-                    <DisplayFormedWords
-                      foundWords={foundWords}
-                      totalScore={totalScore}
-                      setTotalScore={setTotalScore}
-                      validWords={validWords}
-                      setValidWords={setValidWords}
-                      playerName={playerName}
-                      roomId={roomId}
-                    />
-                  </div>
                 </div>
               </div>
             </div>
+          </div>
         )}
 
         {isGameplayed && !isTimerActive && (
           <div className="ml-1 mt-3 flex flex-col gap-4 text-center">
-            <DisplayScore 
-              totalScore={totalScore} 
-              validWords={validWords} 
+            <DisplayScore
+              totalScore={totalScore}
+              validWords={validWords}
               socket={socket}
               roomId={roomId}
-
             />
             <button
               onClick={() => {
@@ -165,28 +169,27 @@ const App = () => {
                 setisGameplayed(false);
               }}
               style={{
-                display: 'inline-block',
-                paddingLeft: '25px',
-                paddingRight: '25px',
-                paddingTop: '15px',
-                paddingBottom: '15px',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginTop: '6px',
+                display: "inline-block",
+                paddingLeft: "25px",
+                paddingRight: "25px",
+                paddingTop: "15px",
+                paddingBottom: "15px",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "6px",
                 boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
-                borderRadius: '100px',
-                backgroundColor:  "#c2fbd7",
-                fontFamily: 'poppins'
-            }}>
+                borderRadius: "100px",
+                backgroundColor: "#c2fbd7",
+                fontFamily: "poppins",
+              }}
+            >
               Play Again
             </button>
           </div>
         )}
       </div>
     </div>
-    
   );
 };
 
 export default App;
-

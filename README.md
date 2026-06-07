@@ -17,6 +17,7 @@ This is my attempt at creating a fun word game to play with friends or when bore
 TWL06 Scrabble Dictionary used
 
 # Tech Stack Used
+
 - React + Vite
 - Flask for backend
 - TWL06 word finder used from [TWL06](https://github.com/fogleman/TWL06.git)
