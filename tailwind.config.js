@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./src/*.jsx"],
+  content: ["./src/**/*.{jsx,js}"],
   theme: {
     extend: {
       backgroundImage: {
@@ -9,7 +9,7 @@ export default {
       },
       fontFamily: {
         outfit: ['"Outfit"', "sans-serif"],
-        poppins: [' "Poppins ', "sans-serif"],
+        poppins: ['"Poppins"', "sans-serif"],
       },
     },
   },

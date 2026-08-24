@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useGame } from "../context/GameContext.jsx";
 
 const DURATION = 60; // seconds
 
-const Timer = ({ socket, isTimerActive, setisTimerActive, roomId }) => {
+const Timer = () => {
+  const { socket, isTimerActive, setisTimerActive, roomId } = useGame();
   const [timeLeft, setTimeLeft] = useState(DURATION);
   const endTimeRef = useRef(null);
 

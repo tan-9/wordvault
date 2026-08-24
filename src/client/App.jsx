@@ -1,29 +1,22 @@
-import React, { useState, useEffect } from "react";
-import Grid from "../components/Grid.jsx";
-import Display from "../components/Display.jsx";
-import DisplayFormedWords from "../components/DisplayFormedWords.jsx";
-import Timer from "../components/Timer.jsx";
-import DisplayScore from "../components/DisplayScore.jsx";
-import GameRoom from "../components/GameRoom.jsx";
-import { io } from "socket.io-client";
-import { HashRouter, useNavigate, useLocation } from "react-router-dom";
-import useAudio from "./hooks/useAudio.js";
-
-const socket = io(import.meta.env.VITE_BACKEND_URL, {
-  transports: ["websocket"],
-});
+import React, { useEffect } from "react";
+import Grid from "./components/Grid.jsx";
+import Display from "./components/Display.jsx";
+import DisplayFormedWords from "./components/DisplayFormedWords.jsx";
+import Timer from "./components/Timer.jsx";
+import DisplayScore from "./components/DisplayScore.jsx";
+import GameRoom from "./components/GameRoom.jsx";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useGame } from "./context/GameContext.jsx";
 
 const App = () => {
-  const [roomId, setRoomId] = useState("");
-  const [playerName, setPlayerName] = useState("");
-  const [isTimerActive, setisTimerActive] = useState(false);
-  const [isGameplayed, setisGameplayed] = useState(false);
-  const [hasJoinedRoom, setHasJoinedRoom] = useState(false);
-  const [selectedLetters, setSelectedLetters] = useState([]);
-  const [foundWords, setFoundWords] = useState([]);
-  const [totalScore, setTotalScore] = useState(0);
-  const [validWords, setValidWords] = useState([]);
-  const [grid, setGrid] = useState([]);
+  const {
+    socket,
+    isTimerActive,
+    isGameplayed,
+    setIsGameplayed,
+    playSound,
+    resetGame,
+  } = useGame();
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -54,34 +47,6 @@ const App = () => {
     }
   }, []);
 
-  const resetGame = () => {
-    setSelectedLetters([]);
-    setFoundWords([]);
-    setTotalScore(0);
-    setValidWords([]);
-  };
-
-  useEffect(() => {
-    socket.on("game_started", ({ grid }) => {
-      resetGame();
-      setGrid(grid);
-      setisTimerActive(true);
-      setisGameplayed(true);
-    });
-
-    socket.on("game_stopped", () => {
-      setisTimerActive(false);
-      setisGameplayed(true);
-    });
-
-    return () => {
-      socket.off("game_started");
-      socket.off("game_stopped");
-    };
-  }, []);
-
-  const playSound = useAudio("button_click.wav");
-
   return (
     <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg overflow-x-hidden">
       <div className="flex flex-col items-center px-4 py-4">
@@ -96,13 +61,7 @@ const App = () => {
               </p>
             </header>
             <div className="bg-white shadow-lg rounded-lg mt-10">
-              <GameRoom
-                socket={socket}
-                setHasJoinedRoom={setHasJoinedRoom}
-                setRoomId={setRoomId}
-                playerName={playerName}
-                setPlayerName={setPlayerName}
-              />
+              <GameRoom />
             </div>
           </div>
         )}
@@ -110,28 +69,17 @@ const App = () => {
         {isTimerActive && (
           <div className="flex flex-col justify-center items-center w-full px-2">
             <div className="bg-white rounded-md mt-5 mb-3 p-3 w-48 flex flex-col items-center justify-center">
-              <Timer
-                socket={socket}
-                isTimerActive={isTimerActive}
-                setisTimerActive={setisTimerActive}
-                roomId={roomId}
-              />
+              <Timer />
             </div>
             <div className="flex flex-col items-center justify-center w-full max-w-5xl bg-white shadow-xl rounded-lg p-3 mt-8 md:p-6">
               <div className="flex flex-col md:flex-row justify-between md:space-x-4 w-full gap-4">
                 <div className="flex flex-col items-center md:items-start w-full md:w-auto md:flex-1">
                   <div className="h-12 text-2xl text-center tracking-widest self-center justify-center overflow-hidden mb-2">
-                    <Display displayLetters={selectedLetters} />
+                    <Display />
                   </div>
                   <div className="w-full p-4 rounded-lg flex bg-slate-200 flex-col items-center overflow-hidden">
                     <div className="w-full max-w-full justify-center">
-                      <Grid
-                        grid={grid}
-                        selectedLetters={selectedLetters}
-                        setSelectedLetters={setSelectedLetters}
-                        foundWords={foundWords}
-                        setFoundWords={setFoundWords}
-                      />
+                      <Grid />
                     </div>
                   </div>
                 </div>
@@ -139,15 +87,7 @@ const App = () => {
                   <h2 className="text-base md:text-lg font-semibold mb-4 font-outfit">
                     Words Formed:
                   </h2>
-                  <DisplayFormedWords
-                    foundWords={foundWords}
-                    totalScore={totalScore}
-                    setTotalScore={setTotalScore}
-                    validWords={validWords}
-                    setValidWords={setValidWords}
-                    playerName={playerName}
-                    roomId={roomId}
-                  />
+                  <DisplayFormedWords />
                 </div>
               </div>
             </div>
@@ -156,17 +96,12 @@ const App = () => {
 
         {isGameplayed && !isTimerActive && (
           <div className="ml-1 mt-3 flex flex-col gap-4 text-center">
-            <DisplayScore
-              totalScore={totalScore}
-              validWords={validWords}
-              socket={socket}
-              roomId={roomId}
-            />
+            <DisplayScore />
             <button
               onClick={() => {
                 playSound();
                 resetGame();
-                setisGameplayed(false);
+                setIsGameplayed(false);
               }}
               style={{
                 display: "inline-block",

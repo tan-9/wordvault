@@ -1,12 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useGame } from "../context/GameContext.jsx";
 
-const Grid = ({
-  grid,
-  selectedLetters,
-  setSelectedLetters,
-  foundWords,
-  setFoundWords,
-}) => {
+const Grid = () => {
+  const { grid, selectedLetters, setSelectedLetters, addWord } = useGame();
   const [isDragging, setIsDragging] = useState(false);
 
   //refs so handlers always see current values without stale closures
@@ -118,10 +114,10 @@ const Grid = ({
 
     setSelectedLetters((prev) => {
       const formedWord = prev.map((l) => l.letter).join("");
-      setFoundWords((prevWords) => [...prevWords, formedWord]);
+      addWord(formedWord);
       return [];
     });
-  }, [setFoundWords, setSelectedLetters]);
+  }, [addWord, setSelectedLetters]);
 
   const selectTileAtPoint = useCallback(
     (clientX, clientY) => {

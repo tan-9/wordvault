@@ -18,7 +18,7 @@ def initialise_db():
         name TEXT,
         words TEXT DEFAULT '[]',
         total_score INTEGER DEFAULT 0,
-        FOREIGN KEY(room_id) REFERENCES rooms(id)
+        FOREIGN KEY(roomId) REFERENCES rooms(id)
     )
     ''')
 

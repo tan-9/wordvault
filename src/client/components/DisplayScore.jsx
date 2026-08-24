@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
+import { useGame } from "../context/GameContext.jsx";
 import {
   Table,
   TableBody,
@@ -9,46 +10,26 @@ import {
   Paper,
   Button,
 } from "@mui/material";
+import { useGameResult } from "../hooks/useGameResult";
 
-const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
-  const [gameResults, setGameResults] = useState(null);
+const DisplayScore = () => {
+  const { totalScore, validWords, roomId } = useGame();
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
-  useEffect(() => {
-    if (!gameResults && roomId) {
-      fetch(`${BACKEND_URL}/game-results/${roomId}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Fetched game results:", data);
-          setGameResults(data);
-        })
-        .catch((err) => console.error("Error fetching game results:", err));
-    }
-  }, [gameResults, roomId]);
-
+  const { data: gameResultsData } = useGameResult(roomId);
   const closePopup = () => setSelectedPlayer(null);
 
-  useEffect(() => {
-    console.log("Game results updated:", gameResults);
-  }, [gameResults]);
-
-  if (gameResults && gameResults.players.length > 1) {
-    const sortedPlayers = [...gameResults.players].sort(
-      (a, b) => (gameResults.scores[b] || 0) - (gameResults.scores[a] || 0),
+  if (gameResultsData && gameResultsData.players.length > 1) {
+    const sortedPlayers = [...gameResultsData.players].sort(
+      (a, b) =>
+        (gameResultsData.scores[b] || 0) - (gameResultsData.scores[a] || 0),
     );
     const winner = sortedPlayers[0];
 
     return (
       <div style={{ fontFamily: "poppins", borderRadius: "4px" }}>
         <div className="text-center text-xl font-bold text-green-600 mb-4">
-          {winner} wins with {gameResults.scores[winner]} points! 🎉
+          {winner} wins with {gameResultsData.scores[winner]} points! 🎉
         </div>
 
         {!selectedPlayer && (
@@ -87,7 +68,7 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
                     <TableCell
                       sx={{ fontFamily: "Poppins, Arial, sans-serif" }}
                     >
-                      {gameResults.scores[player] || 0}
+                      {gameResultsData.scores[player] || 0}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -112,7 +93,7 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
                 Words Found by <b>{selectedPlayer}</b>
               </h2>
               <ul className="space-y-2">
-                {gameResults.words[selectedPlayer]?.map(
+                {gameResultsData.words[selectedPlayer]?.map(
                   ({ word, score }, idx) => (
                     <li key={idx} className="text-gray-700">
                       {word} ({score} points)
