@@ -29,7 +29,6 @@ const Grid = () => {
     const relativeY = rect.top - gridRect.top;
 
     return {
-      // x: rect.left - gridRect.left, y: rect.top - gridRect.top, width: rect.width, height: rect.height
       x: relativeX,
       y: relativeY,
       width: rect.width,
@@ -180,86 +179,127 @@ const Grid = () => {
 
   return (
     <div
-      className="relative"
-      style={{ position: "relative", touchAction: "none", userSelect: "none" }}
+      style={{
+        background: "linear-gradient(160deg, #fff5f8, #ffe4ec)",
+        borderRadius: "20px",
+        padding: "clamp(10px, 3vw, 20px)",
+        boxShadow: "0 8px 24px rgba(255, 105, 150, 0.18)",
+        boxSizing: "border-box",
+      }}
     >
-      <svg
-        ref={svgRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          pointerEvents: "none",
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        {selectedLetters.length > 1 && (
-          <polyline
-            points={getPolylinePoints(selectedLetters)}
-            stroke="lightblue"
-            strokeWidth="6"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        )}
-      </svg>
-
       <div
+        className="relative"
         style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)`,
-          gap: "clamp(6px, 1.5vw, 12px)",
-          width: "100%",
-          boxSizing: "border-box",
+          position: "relative",
           touchAction: "none",
+          userSelect: "none",
         }}
-        ref={gridRef}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handleDragEnd}
-        onPointerCancel={handleDragEnd}
       >
-        {grid.map((row, rowIndex) =>
-          row.map((letter, colIndex) => (
-            <button
-              ref={(elt) => {
-                tileRef.current[`${rowIndex}-${colIndex}`] = elt;
-              }}
-              id={`button-${rowIndex}-${colIndex}`}
-              key={`${rowIndex}-${colIndex}`}
-              style={{
-                backgroundColor: selectedLetters.some(
-                  (l) => l.rowIdx === rowIndex && l.colIdx === colIndex,
-                )
-                  ? "lightblue"
-                  : "#f7ee8f",
-                aspectRatio: "1",
-                minWidth: 0,
-                minHeight: 0,
-                display: "flex",
-                padding: "3px",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "bold",
-                borderRadius: "10%",
-                zIndex: 1,
-                fontSize: "clamp(20px, 5vw, 30px)",
-                transition: "background-color 0.2s ease",
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
-                touchAction: "none",
-                WebkitTapHighlightColor: "transparent",
-                boxSizing: "border-box",
-              }}
-              onPointerDown={(e) => {
-                handlePointerDown(e, rowIndex, colIndex);
-              }}
-              aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
-            >
-              {letter}
-            </button>
-          )),
-        )}
+        <svg
+          ref={svgRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            pointerEvents: "none",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {selectedLetters.length > 1 && (
+            <polyline
+              points={getPolylinePoints(selectedLetters)}
+              stroke="#ff6fa8"
+              strokeWidth="6"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.85"
+            />
+          )}
+          {selectedLetters.map((letter) => {
+            const { x, y, width, height } = getBtnPos(
+              letter.rowIdx,
+              letter.colIdx,
+            );
+            return (
+              <circle
+                key={`${letter.rowIdx}-${letter.colIdx}`}
+                cx={x + width / 2}
+                cy={y + height / 2}
+                r="5"
+                fill="#ff4f92"
+                opacity="0.9"
+              />
+            );
+          })}
+        </svg>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)`,
+            gap: "clamp(6px, 1.5vw, 12px)",
+            width: "100%",
+            boxSizing: "border-box",
+            touchAction: "none",
+          }}
+          ref={gridRef}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handleDragEnd}
+          onPointerCancel={handleDragEnd}
+        >
+          {grid.map((row, rowIndex) =>
+            row.map((letter, colIndex) => {
+              const isSelected = selectedLetters.some(
+                (l) => l.rowIdx === rowIndex && l.colIdx === colIndex,
+              );
+
+              return (
+                <button
+                  ref={(elt) => {
+                    tileRef.current[`${rowIndex}-${colIndex}`] = elt;
+                  }}
+                  id={`button-${rowIndex}-${colIndex}`}
+                  key={`${rowIndex}-${colIndex}`}
+                  style={{
+                    background: isSelected
+                      ? "linear-gradient(145deg, #ff9dc4, #ff6fa8)"
+                      : "linear-gradient(145deg, #fff0f5, #ffd6e8)",
+                    color: isSelected ? "#fff" : "#93436a",
+                    aspectRatio: "1",
+                    minWidth: 0,
+                    minHeight: 0,
+                    display: "flex",
+                    padding: "3px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "bold",
+                    border: "none",
+                    borderRadius: "22%",
+                    zIndex: 1,
+                    fontSize: "clamp(20px, 5vw, 30px)",
+                    transform: isSelected ? "scale(1.06)" : "scale(1)",
+                    transition:
+                      "background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease",
+                    boxShadow: isSelected
+                      ? "0 6px 14px rgba(255, 79, 146, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.5)"
+                      : "0 4px 8px rgba(255, 111, 168, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.9)",
+                    touchAction: "none",
+                    WebkitTapHighlightColor: "transparent",
+                    boxSizing: "border-box",
+                  }}
+                  onPointerDown={(e) => {
+                    handlePointerDown(e, rowIndex, colIndex);
+                  }}
+                  aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
+                >
+                  {letter}
+                </button>
+              );
+            }),
+          )}
+        </div>
       </div>
     </div>
   );

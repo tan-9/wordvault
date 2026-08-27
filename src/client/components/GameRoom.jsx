@@ -87,7 +87,7 @@ const GameRoom = () => {
   if (!inRoom) {
     return (
       <div className="font-poppins flex flex-col gap-4 p-6">
-        <div className="text-center text-[21px] font-semibold">
+        <div className="text-center text-[21px] font-fredoka font-semibold text-plum">
           Start a New Game
         </div>
         <input
@@ -95,7 +95,7 @@ const GameRoom = () => {
           placeholder="Enter a username"
           value={playerName}
           onChange={(e) => setPlayerName(e.target.value)}
-          className="font-poppins text-lg w-full px-3 py-3 rounded-lg border border-[#ccc] outline-none sm:text-base"
+          className="font-poppins text-lg w-full px-4 py-3 rounded-full border-2 border-blush-200 outline-none focus:border-blush-400 sm:text-base"
         />
         {joinViaLink ? (
           <button
@@ -104,7 +104,7 @@ const GameRoom = () => {
               setHasJoinedRoom(true);
             }}
             disabled={!playerName}
-            className="font-poppins py-[14px] w-full rounded-[10px] bg-[#c2fbd7] text-lg shadow-[0px_4px_6px_rgba(0,0,0,0.13)] border-none cursor-pointer transition-colors duration-200 disabled:opacity-50 sm:text-base sm:py-3"
+            className="font-fredoka font-medium py-[14px] w-full rounded-full bg-gradient-to-br from-blush-300 to-blush-500 text-white text-lg shadow-md shadow-blush-300/40 border-none cursor-pointer transition-transform duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 sm:text-base sm:py-3"
           >
             Join game
           </button>
@@ -117,7 +117,7 @@ const GameRoom = () => {
               setHasJoinedRoom(true);
             }}
             disabled={!playerName}
-            className="font-poppins py-[14px] w-full rounded-[10px] bg-[#c2fbd7] text-lg shadow-[0px_4px_6px_rgba(0,0,0,0.13)] border-none cursor-pointer transition-colors duration-200 disabled:opacity-50 sm:text-base sm:py-3"
+            className="font-fredoka font-medium py-[14px] w-full rounded-full bg-gradient-to-br from-blush-300 to-blush-500 text-white text-lg shadow-md shadow-blush-300/40 border-none cursor-pointer transition-transform duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 sm:text-base sm:py-3"
           >
             Create Room and Join
           </button>
@@ -129,7 +129,7 @@ const GameRoom = () => {
               placeholder="Have a code?"
               value={roomId}
               onChange={(e) => setLocalRoomId(e.target.value)}
-              className="font-poppins text-lg w-full px-3 py-3 rounded-lg border border-[#ccc] outline-none sm:text-base"
+              className="font-poppins text-lg w-full px-4 py-3 rounded-full border-2 border-lavender-200 outline-none focus:border-lavender-300 sm:text-base"
             />
             <button
               onClick={() => {
@@ -138,7 +138,7 @@ const GameRoom = () => {
                 setHasJoinedRoom(true);
               }}
               disabled={!playerName || !roomId}
-              className="font-poppins py-[14px] w-full rounded-[10px] bg-[#c2fbd7] text-lg shadow-[0px_4px_6px_rgba(0,0,0,0.13)] border-none cursor-pointer transition-colors duration-200 disabled:opacity-50 sm:text-base sm:py-3"
+              className="font-fredoka font-medium py-[14px] w-full rounded-full bg-gradient-to-br from-mint-200 to-mint-300 text-plum text-lg shadow-md shadow-mint-300/40 border-none cursor-pointer transition-transform duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 sm:text-base sm:py-3"
             >
               Join Room
             </button>
@@ -150,7 +150,7 @@ const GameRoom = () => {
 
   return (
     <div className="font-poppins flex flex-col gap-4 p-6">
-      <div className="text-lg break-all flex items-center gap-2 sm:text-base">
+      <div className="text-lg break-all flex items-center gap-2 sm:text-base text-plum">
         Room ID: <b>{currRoomId}</b>
         <button
           onClick={copyToclipboard}
@@ -169,10 +169,13 @@ const GameRoom = () => {
         </button>
       </div>
       <div className="text-lg">
-        <h3 className="my-2">Waiting for players...</h3>
-        <ul className="text-[17px] w-full p-0 list-none text-center">
+        <h3 className="my-2 font-fredoka text-plum">Waiting for players...</h3>
+        <ul className="text-[17px] w-full p-0 list-none text-center flex flex-col gap-1">
           {players.map((p, idx) => (
-            <li key={idx}>
+            <li
+              key={idx}
+              className="bg-lavender-50 text-plum rounded-full px-3 py-1 inline-block"
+            >
               <i>{p}</i>
             </li>
           ))}
@@ -184,7 +187,7 @@ const GameRoom = () => {
             playSound();
             startGame();
           }}
-          className="font-poppins py-[14px] w-full max-w-[200px] rounded-full bg-[#c2fbd7] text-lg font-semibold shadow-[0px_4px_6px_rgba(0,0,0,0.13)] border-none cursor-pointer transition-colors duration-200 sm:text-base sm:py-3"
+          className="font-fredoka py-[14px] w-full max-w-[200px] rounded-full bg-gradient-to-br from-blush-300 to-blush-500 text-white text-lg font-semibold shadow-md shadow-blush-300/40 border-none cursor-pointer transition-transform duration-200 hover:scale-[1.02] sm:text-base sm:py-3"
         >
           START
         </button>

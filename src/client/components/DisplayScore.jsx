@@ -28,30 +28,33 @@ const DisplayScore = () => {
 
     return (
       <div style={{ fontFamily: "poppins", borderRadius: "4px" }}>
-        <div className="text-center text-xl font-bold text-green-600 mb-4">
+        <div className="text-center text-xl font-fredoka font-semibold text-plum bg-gradient-to-br from-blush-100 to-lavender-100 border border-blush-200 rounded-2xl py-3 mb-4">
           {winner} wins with {gameResultsData.scores[winner]} points! 🎉
         </div>
 
         {!selectedPlayer && (
-          <TableContainer component={Paper}>
+          <TableContainer
+            component={Paper}
+            sx={{ borderRadius: "16px", border: "1px solid #ffd6e8" }}
+          >
             <Table>
               <TableHead>
-                <TableRow>
+                <TableRow sx={{ backgroundColor: "#fff0f5" }}>
                   <TableCell
                     style={{ fontWeight: "bold" }}
-                    sx={{ fontFamily: "Poppins, Arial, sans-serif" }}
+                    sx={{ fontFamily: "Fredoka, sans-serif", color: "#7a3b5e" }}
                   >
                     Player
                   </TableCell>
                   <TableCell
                     style={{ fontWeight: "bold" }}
-                    sx={{ fontFamily: "Poppins, Arial, sans-serif" }}
+                    sx={{ fontFamily: "Fredoka, sans-serif", color: "#7a3b5e" }}
                   >
                     Score
                   </TableCell>
                   <TableCell
                     style={{ fontWeight: "bold" }}
-                    sx={{ fontFamily: "Poppins, Arial, sans-serif" }}
+                    sx={{ fontFamily: "Fredoka, sans-serif", color: "#7a3b5e" }}
                   >
                     Words
                   </TableCell>
@@ -75,6 +78,10 @@ const DisplayScore = () => {
                         onClick={() => setSelectedPlayer(player)}
                         variant="text"
                         size="small"
+                        sx={{
+                          fontFamily: "Fredoka, sans-serif",
+                          color: "#ff6fa8",
+                        }}
                       >
                         View
                       </Button>
@@ -88,14 +95,17 @@ const DisplayScore = () => {
 
         {selectedPlayer && (
           <div className="fixed inset-0 bg-black-100 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-4 shadow-lg">
-              <h2 className="text-xl font-bold mb-4">
+            <div className="bg-cream border-2 border-blush-200 rounded-2xl p-5 shadow-lg">
+              <h2 className="text-xl font-fredoka font-semibold text-plum mb-4">
                 Words Found by <b>{selectedPlayer}</b>
               </h2>
-              <ul className="space-y-2">
+              <ul className="space-y-1.5">
                 {gameResultsData.words[selectedPlayer]?.map(
                   ({ word, score }, idx) => (
-                    <li key={idx} className="text-gray-700">
+                    <li
+                      key={idx}
+                      className="text-plum bg-white/70 rounded-full px-3 py-1"
+                    >
                       {word} ({score} points)
                     </li>
                   ),
@@ -104,7 +114,7 @@ const DisplayScore = () => {
               <Button
                 onClick={closePopup}
                 variant="text"
-                color="primary"
+                sx={{ fontFamily: "Fredoka, sans-serif", color: "#ff6fa8" }}
                 className="mt-4"
               >
                 Close
@@ -118,20 +128,25 @@ const DisplayScore = () => {
 
   return (
     <div
-      className="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center"
+      className="bg-gradient-to-br from-blush-100 to-lavender-100 border border-blush-200 rounded-2xl shadow-sm p-4 flex flex-col items-center"
       style={{ fontFamily: "poppins" }}
     >
-      <div>
-        You Scored <b>{totalScore}</b> points
+      <div className="text-plum">
+        You Scored{" "}
+        <span className="font-fredoka font-semibold">{totalScore}</span>{" "}
+        points
       </div>
-      <div className="mx-2">
-        <hr className="pb-2 border-t border-gray-300" />
+      <div className="mx-2 w-full">
+        <hr className="pb-2 border-t border-blush-200" />
       </div>
-      <div className="mt-3 flex flex-col gap-2">
+      <div className="mt-3 flex flex-col gap-1.5 w-full">
         {validWords.map(({ word, score }, idx) => (
-          <div key={idx} className="font-bold flex flex-row">
-            {word}
-            <div className="text-right px-4">{score}</div>
+          <div
+            key={idx}
+            className="flex flex-row justify-between items-center bg-white/60 rounded-full px-3 py-1"
+          >
+            <span className="font-semibold text-plum">{word}</span>
+            <span className="font-fredoka text-plum">{score}</span>
           </div>
         ))}
       </div>
