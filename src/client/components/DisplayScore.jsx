@@ -128,13 +128,12 @@ const DisplayScore = () => {
 
   return (
     <div
-      className="bg-gradient-to-br from-blush-100 to-lavender-100 border border-blush-200 rounded-2xl shadow-sm p-4 flex flex-col items-center"
+      className="bg-[#fff5f8] border border-blush-200 rounded-2xl shadow-sm p-4 flex flex-col items-center"
       style={{ fontFamily: "poppins" }}
     >
       <div className="text-plum">
         You Scored{" "}
-        <span className="font-fredoka font-semibold">{totalScore}</span>{" "}
-        points
+        <span className="font-fredoka font-semibold">{totalScore}</span> points
       </div>
       <div className="mx-2 w-full">
         <hr className="pb-2 border-t border-blush-200" />

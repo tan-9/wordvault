@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import Grid from "./components/Grid.jsx";
 import Display from "./components/Display.jsx";
 import DisplayFormedWords from "./components/DisplayFormedWords.jsx";
@@ -60,7 +60,7 @@ const App = () => {
                 Drag to connect letters and form words!
               </p>
             </header>
-            <div className="bg-white shadow-lg shadow-blush-300/30 border border-blush-200 rounded-3xl mt-10">
+            <div className="bg-white shadow-lg shadow-blush-300/30 border border-blush-200 rounded-3xl mt-12">
               <GameRoom />
             </div>
           </div>
@@ -77,7 +77,7 @@ const App = () => {
                   <div className="h-12 text-2xl text-center tracking-widest self-center justify-center overflow-hidden mb-2">
                     <Display />
                   </div>
-                  <div className="w-full p-4 rounded-2xl flex bg-lavender-50 flex-col items-center overflow-hidden">
+                  <div className="w-full p-4 rounded-2xl flex bg-gradient-to-br from-[#fff5f8] to-[#ffe4ec] flex-col items-center overflow-hidden">
                     <div className="w-full max-w-full justify-center">
                       <Grid />
                     </div>

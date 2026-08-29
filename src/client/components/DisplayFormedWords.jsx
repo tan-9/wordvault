@@ -14,7 +14,7 @@ const DisplayFormedWords = () => {
           {totalScore}
         </div>
       </div>
-      <div className="w-full flex flex-col gap-1.5 max-h-64 overflow-y-auto pr-1">
+      <div className="w-full flex flex-col gap-1.5 max-h-96 overflow-y-auto pr-1">
         {validWords.map(({ word, score }, idx) => (
           <div
             key={idx}

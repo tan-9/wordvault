@@ -68,9 +68,7 @@ const Timer = () => {
   return (
     <div className="flex flex-col gap-2 items-center">
       <div className="text-lg font-fredoka font-semibold text-plum">
-        {isTimerActive
-          ? `⏳ ${formatTime(timeLeft)}`
-          : "Press Start to Begin"}
+        {isTimerActive ? `⏳ ${formatTime(timeLeft)}` : "Press Start to Begin"}
       </div>
     </div>
   );

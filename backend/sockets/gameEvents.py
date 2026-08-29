@@ -1,7 +1,21 @@
+import os
+
 from flask import request
 from flask_socketio import join_room, leave_room, emit
-from logic.gridGenerator import generate_grid
+from logic.gridGenerator import generate_grid_hybrid, build_trie
 from state import rooms, set_emit_full_player_list
+
+GRID_SIZE = 6
+
+_WORD_LIST_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "logic", "word-lists", "allWords.txt"
+)
+
+with open(_WORD_LIST_PATH) as f:
+    _ALL_WORDS = [line.strip().upper() for line in f if line.strip()]
+
+_SEED_WORDS = [w for w in _ALL_WORDS if 3 <= len(w) <= GRID_SIZE]
+_TRIE = build_trie(_ALL_WORDS)
 
 
 def register_socket_events(socketio):
@@ -17,7 +31,12 @@ def register_socket_events(socketio):
             emit('error', {'message': 'Room not found'})
             return
 
-        grid = generate_grid(6)
+        grid, _, _ = generate_grid_hybrid(
+            size=GRID_SIZE,
+            corpus=_ALL_WORDS,
+            seed_word_bank=_SEED_WORDS,
+            trie=_TRIE,
+        )
         rooms[roomId]["grid"] = grid
         socketio.emit('game_started', {'grid': grid}, room=roomId)
 

@@ -180,10 +180,8 @@ const Grid = () => {
   return (
     <div
       style={{
-        background: "linear-gradient(160deg, #fff5f8, #ffe4ec)",
         borderRadius: "20px",
-        padding: "clamp(10px, 3vw, 20px)",
-        boxShadow: "0 8px 24px rgba(255, 105, 150, 0.18)",
+        padding: "clamp(8px, 3vw, 22px)",
         boxSizing: "border-box",
       }}
     >
@@ -238,9 +236,10 @@ const Grid = () => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)`,
-            gap: "clamp(6px, 1.5vw, 12px)",
-            width: "100%",
+            gridTemplateColumns: `repeat(${grid[0]?.length || 0}, minmax(0, 1fr))`,
+            gap: "clamp(8px, 2vw, 14px)",
+            width: "min(92vw, 440px)",
+            maxWidth: "100%",
             boxSizing: "border-box",
             touchAction: "none",
           }}
@@ -271,14 +270,14 @@ const Grid = () => {
                     minWidth: 0,
                     minHeight: 0,
                     display: "flex",
-                    padding: "3px",
+                    padding: "clamp(4px, 1.7vw, 8px)",
                     alignItems: "center",
                     justifyContent: "center",
                     fontWeight: "bold",
                     border: "none",
-                    borderRadius: "22%",
+                    borderRadius: "26%",
                     zIndex: 1,
-                    fontSize: "clamp(20px, 5vw, 30px)",
+                    fontSize: "clamp(26px, 7vw, 40px)",
                     transform: isSelected ? "scale(1.06)" : "scale(1)",
                     transition:
                       "background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease",

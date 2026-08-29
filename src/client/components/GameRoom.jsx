@@ -18,6 +18,7 @@ const GameRoom = () => {
   const [players, setPlayers] = useState([]);
   const [inRoom, setInRoom] = useState(false);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+  const [isStartingGame, setIsStartingGame] = useState(false);
   const [joinViaLink, setJoinViaLink] = useState(false);
   const [searchParams] = useSearchParams();
   const { mutateAsync: createRoomMutation } = useCreateRoom();
@@ -71,6 +72,7 @@ const GameRoom = () => {
   };
 
   const startGame = () => {
+    setIsStartingGame(true);
     socket.emit("start_game", { roomId: currRoomId });
   };
 
@@ -79,8 +81,18 @@ const GameRoom = () => {
       setPlayers(data.players);
     });
 
+    socket.on("game_started", () => {
+      setIsStartingGame(false);
+    });
+
+    socket.on("error", () => {
+      setIsStartingGame(false);
+    });
+
     return () => {
       socket.off("update_players");
+      socket.off("game_started");
+      socket.off("error");
     };
   }, []);
 
@@ -129,7 +141,7 @@ const GameRoom = () => {
               placeholder="Have a code?"
               value={roomId}
               onChange={(e) => setLocalRoomId(e.target.value)}
-              className="font-poppins text-lg w-full px-4 py-3 rounded-full border-2 border-lavender-200 outline-none focus:border-lavender-300 sm:text-base"
+              className="font-poppins text-lg w-full px-4 py-3 rounded-full border-2 border-mint-200 outline-none focus:border-mint-300 sm:text-base"
             />
             <button
               onClick={() => {
@@ -174,7 +186,7 @@ const GameRoom = () => {
           {players.map((p, idx) => (
             <li
               key={idx}
-              className="bg-lavender-50 text-plum rounded-full px-3 py-1 inline-block"
+              className="bg-[#fff5f8] text-plum rounded-full px-3 py-1 inline-block"
             >
               <i>{p}</i>
             </li>
@@ -187,9 +199,10 @@ const GameRoom = () => {
             playSound();
             startGame();
           }}
-          className="font-fredoka py-[14px] w-full max-w-[200px] rounded-full bg-gradient-to-br from-blush-300 to-blush-500 text-white text-lg font-semibold shadow-md shadow-blush-300/40 border-none cursor-pointer transition-transform duration-200 hover:scale-[1.02] sm:text-base sm:py-3"
+          disabled={isStartingGame}
+          className="font-fredoka py-[14px] w-full max-w-[200px] rounded-full bg-gradient-to-br from-blush-300 to-blush-500 text-white text-lg font-semibold shadow-md shadow-blush-300/40 border-none cursor-pointer transition-transform duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 sm:text-base sm:py-3"
         >
-          START
+          {isStartingGame ? "Starting..." : "START"}
         </button>
       </div>
     </div>
