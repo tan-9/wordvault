@@ -62,7 +62,11 @@ export const GameProvider = ({ children }) => {
   useEffect(() => {
     socket.on("game_started", ({ grid }) => {
       resetGame();
-      setGrid(grid.map((row) => row.map((letter) => (letter === "Q" ? "QU" : letter))));
+      setGrid(
+        grid.map((row) =>
+          row.map((letter) => (letter === "Q" ? "QU" : letter)),
+        ),
+      );
       setisTimerActive(true);
       setIsGameplayed(true);
     });

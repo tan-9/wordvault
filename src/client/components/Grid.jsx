@@ -255,7 +255,10 @@ const Grid = () => {
         >
           {grid.map((row, rowIndex) =>
             row.map((letter, colIndex) => {
-              const image = tileImages[`../../assets/letter-tiles/${letter.toLowerCase()}.webp`];
+              const image =
+                tileImages[
+                  `../../assets/letter-tiles/${letter.toLowerCase()}.webp`
+                ];
               const isSelected = selectedLetters.some(
                 (l) => l.rowIdx === rowIndex && l.colIdx === colIndex,
               );

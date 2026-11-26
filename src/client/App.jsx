@@ -49,7 +49,9 @@ const App = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-cream bg-bgImg overflow-x-hidden">
-      <div className={`flex flex-col items-center py-4 ${isTimerActive ? "w-full max-w-3xl px-2" : "px-4"}`}>
+      <div
+        className={`flex flex-col items-center py-4 ${isTimerActive ? "w-full max-w-3xl px-2" : "px-4"}`}
+      >
         {!isGameplayed && (
           <div>
             <header className="text-center">
