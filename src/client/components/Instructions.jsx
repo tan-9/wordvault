@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 const Instructions = ({ displayInstructions, setDisplayInstructions }) => {
   const handleToggle = () => {
     setDisplayInstructions((prev) => !prev);

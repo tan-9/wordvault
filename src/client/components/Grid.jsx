@@ -1,17 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useGame } from "../context/GameContext.jsx";
 
-const tileImages = import.meta.glob("../assets/letter-tiles/*.webp", {
+const tileImages = import.meta.glob("../../assets/letter-tiles/*.webp", {
   eager: true,
   import: "default",
 });
 
-const Grid = ({
-  grid,
-  selectedLetters,
-  setSelectedLetters,
-  foundWords,
-  setFoundWords,
-}) => {
+const Grid = () => {
+  const { grid, selectedLetters, setSelectedLetters, addWord } = useGame();
   const [isDragging, setIsDragging] = useState(false);
 
   //refs so handlers always see current values without stale closures
@@ -38,7 +34,6 @@ const Grid = ({
     const relativeY = rect.top - gridRect.top;
 
     return {
-      // x: rect.left - gridRect.left, y: rect.top - gridRect.top, width: rect.width, height: rect.height
       x: relativeX,
       y: relativeY,
       width: rect.width,
@@ -123,10 +118,10 @@ const Grid = ({
 
     setSelectedLetters((prev) => {
       const formedWord = prev.map((l) => l.letter).join("");
-      setFoundWords((prevWords) => [...prevWords, formedWord]);
+      addWord(formedWord);
       return [];
     });
-  }, [setFoundWords, setSelectedLetters]);
+  }, [addWord, setSelectedLetters]);
 
   const selectTileAtPoint = useCallback(
     (clientX, clientY) => {
@@ -189,94 +184,129 @@ const Grid = ({
 
   return (
     <div
-      className="relative"
-      style={{ position: "relative", touchAction: "none", userSelect: "none" }}
+      style={{
+        borderRadius: "20px",
+        padding: 0,
+        boxSizing: "border-box",
+      }}
     >
-      <svg
-        ref={svgRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          pointerEvents: "none",
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        {selectedLetters.length > 1 && (
-          <polyline
-            points={getPolylinePoints(selectedLetters)}
-            stroke="lightblue"
-            strokeWidth="6"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        )}
-      </svg>
-
       <div
+        className="relative"
         style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)`,
-          gap: "clamp(4px, 1vw, 8px)",
-          width: "100%",
-          boxSizing: "border-box",
+          position: "relative",
           touchAction: "none",
+          userSelect: "none",
         }}
-        ref={gridRef}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handleDragEnd}
-        onPointerCancel={handleDragEnd}
       >
-        {grid.map((row, rowIndex) =>
-          row.map((letter, colIndex) => {
-            const image =
-              tileImages[`../assets/letter-tiles/${letter.toLowerCase()}.webp`];
-            const selected = selectedLetters.some(
-              (l) => l.rowIdx === rowIndex && l.colIdx === colIndex,
+        <svg
+          ref={svgRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            pointerEvents: "none",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {selectedLetters.length > 1 && (
+            <polyline
+              points={getPolylinePoints(selectedLetters)}
+              stroke="#ff6fa8"
+              strokeWidth="6"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.85"
+            />
+          )}
+          {selectedLetters.map((letter) => {
+            const { x, y, width, height } = getBtnPos(
+              letter.rowIdx,
+              letter.colIdx,
             );
             return (
-              <button
-                ref={(elt) => {
-                  tileRef.current[`${rowIndex}-${colIndex}`] = elt;
-                }}
-                id={`button-${rowIndex}-${colIndex}`}
-                key={`${rowIndex}-${colIndex}`}
-                style={{
-                  backgroundColor: image ? "transparent" : "#f7ee8f",
-                  backgroundImage: image && `url("${image}")`,
-                  backgroundSize: "contain",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center",
-                  aspectRatio: "1",
-                  minWidth: 0,
-                  minHeight: 0,
-                  display: "flex",
-                  padding: "3px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: "bold",
-                  borderRadius: "10%",
-                  zIndex: 1,
-                  fontSize: "clamp(20px, 5vw, 30px)",
-                  boxShadow: selected
-                    ? "inset 0 0 0 3px #237599, inset 0 0 0 100vmax rgba(85, 187, 230, 0.35)"
-                    : "0px 4px 6px rgba(0, 0, 0, 0.3)",
-                  touchAction: "none",
-                  WebkitTapHighlightColor: "transparent",
-                  boxSizing: "border-box",
-                }}
-                onPointerDown={(e) => {
-                  handlePointerDown(e, rowIndex, colIndex);
-                }}
-                aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
-              >
-                {!image && letter}
-              </button>
+              <circle
+                key={`${letter.rowIdx}-${letter.colIdx}`}
+                cx={x + width / 2}
+                cy={y + height / 2}
+                r="5"
+                fill="#ff4f92"
+                opacity="0.9"
+              />
             );
-          }),
-        )}
+          })}
+        </svg>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${grid[0]?.length || 0}, minmax(0, 1fr))`,
+            gap: "clamp(4px, 1vw, 8px)",
+            width: "100%",
+            maxWidth: "100%",
+            boxSizing: "border-box",
+            touchAction: "none",
+          }}
+          ref={gridRef}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handleDragEnd}
+          onPointerCancel={handleDragEnd}
+        >
+          {grid.map((row, rowIndex) =>
+            row.map((letter, colIndex) => {
+              const image = tileImages[`../../assets/letter-tiles/${letter.toLowerCase()}.webp`];
+              const isSelected = selectedLetters.some(
+                (l) => l.rowIdx === rowIndex && l.colIdx === colIndex,
+              );
+
+              return (
+                <button
+                  ref={(elt) => {
+                    tileRef.current[`${rowIndex}-${colIndex}`] = elt;
+                  }}
+                  id={`button-${rowIndex}-${colIndex}`}
+                  key={`${rowIndex}-${colIndex}`}
+                  style={{
+                    backgroundColor: image ? "transparent" : "#fff0f5",
+                    backgroundImage: image && `url("${image}")`,
+                    backgroundSize: "contain",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
+                    color: isSelected ? "#fff" : "#93436a",
+                    aspectRatio: "1",
+                    minWidth: 0,
+                    minHeight: 0,
+                    display: "flex",
+                    padding: "clamp(4px, 1.7vw, 8px)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "bold",
+                    border: "none",
+                    borderRadius: "10%",
+                    zIndex: 1,
+                    fontSize: "clamp(26px, 7vw, 40px)",
+                    transform: isSelected ? "scale(1.06)" : "scale(1)",
+                    transition:
+                      "background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease",
+                    boxShadow: isSelected
+                      ? "0 6px 14px rgba(255, 79, 146, 0.45), inset 0 0 0 3px #ff4f92"
+                      : "0 4px 8px rgba(255, 111, 168, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.9)",
+                    touchAction: "none",
+                    WebkitTapHighlightColor: "transparent",
+                    boxSizing: "border-box",
+                  }}
+                  onPointerDown={(e) => {
+                    handlePointerDown(e, rowIndex, colIndex);
+                  }}
+                  aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
+                >
+                  {!image && letter}
+                </button>
+              );
+            }),
+          )}
+        </div>
       </div>
     </div>
   );

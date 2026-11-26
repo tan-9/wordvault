@@ -13,6 +13,7 @@ body {
   overflow-x: hidden;
   position: relative;
   -webkit-overflow-scrolling: touch;
+  background-color: #fffaf3;
 }
 
 @media screen and (max-width: 768px) {

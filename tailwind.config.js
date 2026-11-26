@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./src/*.jsx"],
+  content: ["./src/**/*.{jsx,js}"],
   theme: {
     extend: {
       backgroundImage: {
@@ -9,7 +9,32 @@ export default {
       },
       fontFamily: {
         outfit: ['"Outfit"', "sans-serif"],
-        poppins: [' "Poppins ', "sans-serif"],
+        poppins: ['"Poppins"', "sans-serif"],
+        fredoka: ['"Fredoka"', "sans-serif"],
+      },
+      colors: {
+        blush: {
+          50: "#fff8fa",
+          100: "#fff0f5",
+          200: "#ffd6e8",
+          300: "#ffb3d1",
+          400: "#ff8cbd",
+          500: "#ff6fa8",
+          600: "#e0559a",
+        },
+        lavender: {
+          50: "#f6f1fc",
+          100: "#ede1f8",
+          200: "#d9c5ef",
+          300: "#c3a8e6",
+        },
+        mint: {
+          100: "#e3f9f2",
+          200: "#bdf0e0",
+          300: "#8ee3c8",
+        },
+        cream: "#fffaf3",
+        plum: "#7a3b5e",
       },
     },
   },

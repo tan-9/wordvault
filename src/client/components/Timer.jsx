@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useGame } from "../context/GameContext.jsx";
 
 const DURATION = 60; // seconds
 
-const Timer = ({ socket, isTimerActive, setisTimerActive, roomId }) => {
+const Timer = () => {
+  const { socket, isTimerActive, setisTimerActive, roomId } = useGame();
   const [timeLeft, setTimeLeft] = useState(DURATION);
   const endTimeRef = useRef(null);
 
@@ -65,10 +67,8 @@ const Timer = ({ socket, isTimerActive, setisTimerActive, roomId }) => {
 
   return (
     <div className="flex flex-col gap-2 items-center">
-      <div className="text-lg font-bold" style={{ fontFamily: "poppins" }}>
-        {isTimerActive
-          ? `Time Left: ${formatTime(timeLeft)}`
-          : "Press Start to Begin"}
+      <div className="text-lg font-fredoka font-semibold text-plum">
+        {isTimerActive ? `⏳ ${formatTime(timeLeft)}` : "Press Start to Begin"}
       </div>
     </div>
   );

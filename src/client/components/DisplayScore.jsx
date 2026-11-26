@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
+import { useGame } from "../context/GameContext.jsx";
 import {
   Table,
   TableBody,
@@ -9,68 +10,51 @@ import {
   Paper,
   Button,
 } from "@mui/material";
+import { useGameResult } from "../hooks/useGameResult";
 
-const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
-  const [gameResults, setGameResults] = useState(null);
+const DisplayScore = () => {
+  const { totalScore, validWords, roomId } = useGame();
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
-  useEffect(() => {
-    if (!gameResults && roomId) {
-      fetch(`${BACKEND_URL}/game-results/${roomId}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Fetched game results:", data);
-          setGameResults(data);
-        })
-        .catch((err) => console.error("Error fetching game results:", err));
-    }
-  }, [gameResults, roomId]);
-
+  const { data: gameResultsData } = useGameResult(roomId);
   const closePopup = () => setSelectedPlayer(null);
 
-  useEffect(() => {
-    console.log("Game results updated:", gameResults);
-  }, [gameResults]);
-
-  if (gameResults && gameResults.players.length > 1) {
-    const sortedPlayers = [...gameResults.players].sort(
-      (a, b) => (gameResults.scores[b] || 0) - (gameResults.scores[a] || 0),
+  if (gameResultsData && gameResultsData.players.length > 1) {
+    const sortedPlayers = [...gameResultsData.players].sort(
+      (a, b) =>
+        (gameResultsData.scores[b] || 0) - (gameResultsData.scores[a] || 0),
     );
     const winner = sortedPlayers[0];
 
     return (
       <div style={{ fontFamily: "poppins", borderRadius: "4px" }}>
-        <div className="text-center text-xl font-bold text-green-600 mb-4">
-          {winner} wins with {gameResults.scores[winner]} points! 🎉
+        <div className="text-center text-xl font-fredoka font-semibold text-plum bg-gradient-to-br from-blush-100 to-lavender-100 border border-blush-200 rounded-2xl py-3 mb-4">
+          {winner} wins with {gameResultsData.scores[winner]} points! 🎉
         </div>
 
         {!selectedPlayer && (
-          <TableContainer component={Paper}>
+          <TableContainer
+            component={Paper}
+            sx={{ borderRadius: "16px", border: "1px solid #ffd6e8" }}
+          >
             <Table>
               <TableHead>
-                <TableRow>
+                <TableRow sx={{ backgroundColor: "#fff0f5" }}>
                   <TableCell
                     style={{ fontWeight: "bold" }}
-                    sx={{ fontFamily: "Poppins, Arial, sans-serif" }}
+                    sx={{ fontFamily: "Fredoka, sans-serif", color: "#7a3b5e" }}
                   >
                     Player
                   </TableCell>
                   <TableCell
                     style={{ fontWeight: "bold" }}
-                    sx={{ fontFamily: "Poppins, Arial, sans-serif" }}
+                    sx={{ fontFamily: "Fredoka, sans-serif", color: "#7a3b5e" }}
                   >
                     Score
                   </TableCell>
                   <TableCell
                     style={{ fontWeight: "bold" }}
-                    sx={{ fontFamily: "Poppins, Arial, sans-serif" }}
+                    sx={{ fontFamily: "Fredoka, sans-serif", color: "#7a3b5e" }}
                   >
                     Words
                   </TableCell>
@@ -87,13 +71,17 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
                     <TableCell
                       sx={{ fontFamily: "Poppins, Arial, sans-serif" }}
                     >
-                      {gameResults.scores[player] || 0}
+                      {gameResultsData.scores[player] || 0}
                     </TableCell>
                     <TableCell>
                       <Button
                         onClick={() => setSelectedPlayer(player)}
                         variant="text"
                         size="small"
+                        sx={{
+                          fontFamily: "Fredoka, sans-serif",
+                          color: "#ff6fa8",
+                        }}
                       >
                         View
                       </Button>
@@ -107,14 +95,17 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
 
         {selectedPlayer && (
           <div className="fixed inset-0 bg-black-100 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-4 shadow-lg">
-              <h2 className="text-xl font-bold mb-4">
+            <div className="bg-cream border-2 border-blush-200 rounded-2xl p-5 shadow-lg">
+              <h2 className="text-xl font-fredoka font-semibold text-plum mb-4">
                 Words Found by <b>{selectedPlayer}</b>
               </h2>
-              <ul className="space-y-2">
-                {gameResults.words[selectedPlayer]?.map(
+              <ul className="space-y-1.5">
+                {gameResultsData.words[selectedPlayer]?.map(
                   ({ word, score }, idx) => (
-                    <li key={idx} className="text-gray-700">
+                    <li
+                      key={idx}
+                      className="text-plum bg-white/70 rounded-full px-3 py-1"
+                    >
                       {word} ({score} points)
                     </li>
                   ),
@@ -123,7 +114,7 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
               <Button
                 onClick={closePopup}
                 variant="text"
-                color="primary"
+                sx={{ fontFamily: "Fredoka, sans-serif", color: "#ff6fa8" }}
                 className="mt-4"
               >
                 Close
@@ -137,20 +128,24 @@ const DisplayScore = ({ totalScore, validWords, socket, roomId }) => {
 
   return (
     <div
-      className="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center"
+      className="bg-[#fff5f8] border border-blush-200 rounded-2xl shadow-sm p-4 flex flex-col items-center"
       style={{ fontFamily: "poppins" }}
     >
-      <div>
-        You Scored <b>{totalScore}</b> points
+      <div className="text-plum">
+        You Scored{" "}
+        <span className="font-fredoka font-semibold">{totalScore}</span> points
       </div>
-      <div className="mx-2">
-        <hr className="pb-2 border-t border-gray-300" />
+      <div className="mx-2 w-full">
+        <hr className="pb-2 border-t border-blush-200" />
       </div>
-      <div className="mt-3 flex flex-col gap-2">
+      <div className="mt-3 flex flex-col gap-1.5 w-full">
         {validWords.map(({ word, score }, idx) => (
-          <div key={idx} className="font-bold flex flex-row">
-            {word}
-            <div className="text-right px-4">{score}</div>
+          <div
+            key={idx}
+            className="flex flex-row justify-between items-center bg-white/60 rounded-full px-3 py-1"
+          >
+            <span className="font-semibold text-plum">{word}</span>
+            <span className="font-fredoka text-plum">{score}</span>
           </div>
         ))}
       </div>
