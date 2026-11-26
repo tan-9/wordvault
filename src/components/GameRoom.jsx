@@ -117,7 +117,6 @@ const GameRoom = ({
   const cardStyle = {
     width: "100%",
     maxWidth: 400,
-    // backgroundColor: 'pink',
     borderRadius: 9,
     boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
     padding: "2vw 4vw",
@@ -135,6 +134,7 @@ const GameRoom = ({
     margin: "8px 0",
     borderRadius: 8,
     border: "0.5px solid #ccc",
+    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.13)",
     outline: "none",
     boxSizing: "border-box",
   };
@@ -145,7 +145,7 @@ const GameRoom = ({
     width: "100%",
     margin: "10px 0",
     borderRadius: 10,
-    backgroundColor: "#c2fbd7",
+    backgroundColor: "#ffdef4f5",
     fontSize: "18px",
     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.13)",
     border: "none",

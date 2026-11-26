@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Grid from "../components/Grid.jsx";
-import Display from "../components/Display.jsx";
-import DisplayFormedWords from "../components/DisplayFormedWords.jsx";
-import Timer from "../components/Timer.jsx";
-import DisplayScore from "../components/DisplayScore.jsx";
-import GameRoom from "../components/GameRoom.jsx";
+import Grid from "./components/Grid.jsx";
+import Display from "./components/Display.jsx";
+import DisplayFormedWords from "./components/DisplayFormedWords";
+import Timer from "./components/Timer.jsx";
+import DisplayScore from "./components/DisplayScore";
+import GameRoom from "./components/GameRoom";
 import { io } from "socket.io-client";
 import { HashRouter, useNavigate, useLocation } from "react-router-dom";
 import useAudio from "./hooks/useAudio.js";
@@ -64,7 +64,7 @@ const App = () => {
   useEffect(() => {
     socket.on("game_started", ({ grid }) => {
       resetGame();
-      setGrid(grid);
+      setGrid(grid.map((row) => row.map((letter) => letter === "Q" ? "QU" : letter)));
       setisTimerActive(true);
       setisGameplayed(true);
     });
@@ -83,8 +83,8 @@ const App = () => {
   const playSound = useAudio("button_click.wav");
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg overflow-x-hidden">
-      <div className="flex flex-col items-center px-4 py-4">
+    <div className="min-h-screen flex flex-col items-center bg-neutral-200 bg-bgImg bg-[#fff1f8] overflow-x-hidden">
+      <div className={`flex flex-col items-center py-4 ${isTimerActive ? "w-full max-w-3xl px-2" : "px-4"}`}>
         {!isGameplayed && (
           <div>
             <header className="text-center">
@@ -108,7 +108,7 @@ const App = () => {
         )}
 
         {isTimerActive && (
-          <div className="flex flex-col justify-center items-center w-full px-2">
+          <div className="flex flex-col justify-center items-center w-full">
             <div className="bg-white rounded-md mt-5 mb-3 p-3 w-48 flex flex-col items-center justify-center">
               <Timer
                 socket={socket}
@@ -117,13 +117,13 @@ const App = () => {
                 roomId={roomId}
               />
             </div>
-            <div className="flex flex-col items-center justify-center w-full max-w-5xl bg-white shadow-xl rounded-lg p-3 mt-8 md:p-6">
-              <div className="flex flex-col md:flex-row justify-between md:space-x-4 w-full gap-4">
-                <div className="flex flex-col items-center md:items-start w-full md:w-auto md:flex-1">
+            <div className="flex flex-col items-center justify-center w-full bg-white shadow-xl rounded-lg p-2 mt-8 md:p-4">
+              <div className="flex flex-col md:flex-row justify-between w-full gap-4">
+                <div className="flex flex-col items-center md:items-start w-full min-w-0 md:flex-1">
                   <div className="h-12 text-2xl text-center tracking-widest self-center justify-center overflow-hidden mb-2">
                     <Display displayLetters={selectedLetters} />
                   </div>
-                  <div className="w-full p-4 rounded-lg flex bg-slate-200 flex-col items-center overflow-hidden">
+                  <div className="w-full p-2 rounded-lg flex bg-slate-200 flex-col items-center overflow-hidden">
                     <div className="w-full max-w-full justify-center">
                       <Grid
                         grid={grid}

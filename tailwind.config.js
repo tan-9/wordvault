@@ -5,7 +5,7 @@ export default {
     extend: {
       backgroundImage: {
         bgImg:
-          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17' viewBox='0 0 24 24'%3E%3Cg fill='%239C92AC' fill-opacity='0.19'%3E%3Cpolygon fill-rule='evenodd' points='8 4 12 6 8 8 6 12 4 8 0 6 4 4 6 0 8 4'/%3E%3C/g%3E%3C/svg%3E\")",
+          "url(\"data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h16v2h-6v6h6v8H8v-6H2v6H0V0zm4 4h2v2H4V4zm8 8h2v2h-2v-2zm-8 0h2v2H4v-2zm8-8h2v2h-2V4z' fill='%23ffc0ec' fill-opacity='0.42' fill-rule='evenodd'/%3E%3C/svg%3E\")",
       },
       fontFamily: {
         outfit: ['"Outfit"', "sans-serif"],

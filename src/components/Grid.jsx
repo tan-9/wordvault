@@ -1,5 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
+const tileImages = import.meta.glob("../assets/letter-tiles/*.webp", {
+  eager: true,
+  import: "default",
+});
+
 const Grid = ({
   grid,
   selectedLetters,
@@ -214,7 +219,7 @@ const Grid = ({
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${grid[0]?.length || 0}, 1fr)`,
-          gap: "clamp(6px, 1.5vw, 12px)",
+          gap: "clamp(4px, 1vw, 8px)",
           width: "100%",
           boxSizing: "border-box",
           touchAction: "none",
@@ -225,44 +230,52 @@ const Grid = ({
         onPointerCancel={handleDragEnd}
       >
         {grid.map((row, rowIndex) =>
-          row.map((letter, colIndex) => (
-            <button
-              ref={(elt) => {
-                tileRef.current[`${rowIndex}-${colIndex}`] = elt;
-              }}
-              id={`button-${rowIndex}-${colIndex}`}
-              key={`${rowIndex}-${colIndex}`}
-              style={{
-                backgroundColor: selectedLetters.some(
-                  (l) => l.rowIdx === rowIndex && l.colIdx === colIndex,
-                )
-                  ? "lightblue"
-                  : "#f7ee8f",
-                aspectRatio: "1",
-                minWidth: 0,
-                minHeight: 0,
-                display: "flex",
-                padding: "3px",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "bold",
-                borderRadius: "10%",
-                zIndex: 1,
-                fontSize: "clamp(20px, 5vw, 30px)",
-                transition: "background-color 0.2s ease",
-                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.3)",
-                touchAction: "none",
-                WebkitTapHighlightColor: "transparent",
-                boxSizing: "border-box",
-              }}
-              onPointerDown={(e) => {
-                handlePointerDown(e, rowIndex, colIndex);
-              }}
-              aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
-            >
-              {letter}
-            </button>
-          )),
+          row.map((letter, colIndex) => {
+            const image =
+              tileImages[`../assets/letter-tiles/${letter.toLowerCase()}.webp`];
+            const selected = selectedLetters.some(
+              (l) => l.rowIdx === rowIndex && l.colIdx === colIndex,
+            );
+            return (
+              <button
+                ref={(elt) => {
+                  tileRef.current[`${rowIndex}-${colIndex}`] = elt;
+                }}
+                id={`button-${rowIndex}-${colIndex}`}
+                key={`${rowIndex}-${colIndex}`}
+                style={{
+                  backgroundColor: image ? "transparent" : "#f7ee8f",
+                  backgroundImage: image && `url("${image}")`,
+                  backgroundSize: "contain",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  aspectRatio: "1",
+                  minWidth: 0,
+                  minHeight: 0,
+                  display: "flex",
+                  padding: "3px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "bold",
+                  borderRadius: "10%",
+                  zIndex: 1,
+                  fontSize: "clamp(20px, 5vw, 30px)",
+                  boxShadow: selected
+                    ? "inset 0 0 0 3px #237599, inset 0 0 0 100vmax rgba(85, 187, 230, 0.35)"
+                    : "0px 4px 6px rgba(0, 0, 0, 0.3)",
+                  touchAction: "none",
+                  WebkitTapHighlightColor: "transparent",
+                  boxSizing: "border-box",
+                }}
+                onPointerDown={(e) => {
+                  handlePointerDown(e, rowIndex, colIndex);
+                }}
+                aria-label={`${letter} at row ${rowIndex + 1}, column ${colIndex + 1}`}
+              >
+                {!image && letter}
+              </button>
+            );
+          }),
         )}
       </div>
     </div>
