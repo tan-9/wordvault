@@ -55,7 +55,8 @@ def joinroom():
 def get_room(roomId):
     if roomId not in rooms:
         return jsonify({"error": "Room not found"}), 404
-    return jsonify(rooms[roomId]), 200
+    room = rooms[roomId]
+    return jsonify({key: room[key] for key in ("players", "words", "scores", "grid")}), 200
 
 
 @rooms_bp.route('/game-results/<roomId>', methods=['GET'])
