@@ -3,7 +3,7 @@ import string
 from collections import defaultdict, Counter
 
 VOWELS = set("AEIOU")
-
+MAX_PLACEMENT_NODES = 250
 
 def is_vowel(ch):
     return ch in VOWELS
@@ -93,7 +93,7 @@ def _king_neighbors(r, c, size):
             if 0 <= nr < size and 0 <= nc < size:
                 yield nr, nc
 
-def try_place_word(grid, word, rng, max_starts=None):
+def try_place_word(grid, word, rng, max_starts=None, max_nodes=None):
     """
     Backtrack `word` onto a self-avoiding king-move path. Empty cells get
     the word's letter; already-filled cells must already match (a
@@ -108,6 +108,11 @@ def try_place_word(grid, word, rng, max_starts=None):
         starts = starts[:max_starts]
 
     def backtrack(path, visited):
+        nonlocal max_nodes
+        if max_nodes is not None:
+            if max_nodes == 0:
+                return None
+            max_nodes -= 1
         i = len(path)
         if i == len(word):
             return path
@@ -141,47 +146,94 @@ def try_place_word(grid, word, rng, max_starts=None):
     return None
 
 
-def seed_words(grid, word_bank, rng, target_count=8, max_len=None):
+def seed_words(grid, word_bank, rng, target_count=8):
     """
     Try to place `target_count` words from word_bank as guaranteed finds.
     Returns [(word, path), ...] for the ones that landed; their cells
     should be locked before you fill/refine the rest of the grid.
     """
-    size = len(grid)
-    max_len = max_len or size
-    candidates = [w for w in word_bank if 3 <= len(w) <= max_len]
+    capacity = len(grid) ** 2
+    candidates = [w for w in word_bank if 3 <= len(w) <= capacity]
     rng.shuffle(candidates)
 
     placed, locked = [], set()
     for w in candidates:
         if len(placed) >= target_count:
             break
-        path = try_place_word(grid, w, rng)
+        path = try_place_word(grid, w, rng, max_nodes=MAX_PLACEMENT_NODES)
         if path:
             placed.append((w.upper(), path))
             locked.update(path)
     return placed, locked
 
 
+def seed_tiles(word):
+    """A Q tile spells QU on the client. A standalone Q cannot be traced."""
+    word = word.upper()
+    tiles = word.replace("QU", "Q")
+    return tiles if tiles.replace("Q", "QU") == word else ""
+
+
+def place_drawn_words(grid, words, rng):
+    """Place a room's draw on an empty grid, with a bounded random search."""
+    size = len(grid)
+    targets = sorted(((w, seed_tiles(w)) for w in words),
+                     key=lambda target: len(target[1]), reverse=True)
+    if any(not tiles for _, tiles in targets) or sum(len(t) for _, t in targets) > size * size:
+        raise ValueError("Drawn words must fit on separate paths")
+
+    placed = []
+    for word, tiles in targets:
+        path = try_place_word(grid, tiles, rng, max_nodes=MAX_PLACEMENT_NODES)
+        if path is None:
+            break
+        placed.append((word, path))
+    else:
+        return placed
+
+    # Restart on disjoint segments of one continuous path so placement always finishes.
+    for row in grid:
+        row[:] = [None] * size
+    order = snake_order(size)
+    if rng.choice((True, False)):
+        order = [(c, r) for r, c in order]
+    if rng.choice((True, False)):
+        order.reverse()
+    offset = rng.randint(0, len(order) - sum(len(t) for _, t in targets))
+    placed = []
+    for word, tiles in targets:
+        path = order[offset:offset + len(tiles)]
+        for (r, c), tile in zip(path, tiles):
+            grid[r][c] = tile
+        placed.append((word, path))
+        offset += len(tiles)
+    return placed
+
+
 def generate_grid(size=6, corpus=None, seed_word_bank=None, target_seed_words=0,
                    n=3, fill_pattern="snake", max_consonant_run=2, max_vowel_run=2,
-                   seed=None):
+                   seed=None, *, models=None, drawn_words=()):
     """
-    corpus: word list used to build the n-gram filler model.
+    corpus: word list used to build the n-gram filler model when no
+            prebuilt models are supplied.
     seed_word_bank: word list to draw guaranteed placements from (place-
                     then-fill). Leave target_seed_words=0 to skip this and
                     get pure n-gram generation, as in v1.
-    Returns (grid, placed_seeds) where placed_seeds is [(word, path), ...].
+    Returns (grid, placed_seeds, locked) where placed_seeds is [(word, path), ...].
     """
     rng = random.Random(seed)
     grid = [[None] * size for _ in range(size)]
     locked = set()
     placed_seeds = []
 
-    if seed_word_bank and target_seed_words:
-        placed_seeds, locked = seed_words(grid, seed_word_bank, rng, target_seed_words, max_len=size)
+    if drawn_words:
+        placed_seeds = place_drawn_words(grid, drawn_words, rng)
+        locked = {cell for _, path in placed_seeds for cell in path}
+    elif seed_word_bank and target_seed_words:
+        placed_seeds, locked = seed_words(grid, seed_word_bank, rng, target_seed_words)
 
-    models = build_ngram_model(corpus, n=n) if corpus else None
+    if models is None and corpus:
+        models = build_ngram_model(corpus, n=n)
     order = FILL_ORDERS[fill_pattern](size)
     context = ""
     consonant_run = vowel_run = 0
@@ -211,107 +263,3 @@ def generate_grid(size=6, corpus=None, seed_word_bank=None, target_seed_words=0,
 
     return grid, placed_seeds, locked
 
-
-# ---------------------------------------------------------------------------
-# 5. Fitness: findable words via trie DFS  (unchanged from v1)
-# ---------------------------------------------------------------------------
-
-class _TrieNode:
-    __slots__ = ("children", "is_word")
-
-    def __init__(self):
-        self.children = {}
-        self.is_word = False
-
-
-def build_trie(word_list):
-    root = _TrieNode()
-    for w in word_list:
-        node = root
-        for ch in w.upper():
-            node = node.children.setdefault(ch, _TrieNode())
-        node.is_word = True
-    return root
-
-
-def count_words_in_grid(grid, trie, min_len=3):
-    size = len(grid)
-    found = set()
-
-    def dfs(r, c, node, path, visited):
-        node = node.children.get(grid[r][c])
-        if node is None:
-            return
-        path = path + grid[r][c]
-        if node.is_word and len(path) >= min_len:
-            found.add(path)
-        for nr, nc in _king_neighbors(r, c, size):
-            if (nr, nc) not in visited:
-                dfs(nr, nc, node, path, visited | {(nr, nc)})
-
-    for r in range(size):
-        for c in range(size):
-            dfs(r, c, trie, "", {(r, c)})
-    return found
-
-
-# ---------------------------------------------------------------------------
-# 6. Simulated annealing refinement over the free cells only
-#    (replaces k-random-restart best-of-k with real local search)
-# ---------------------------------------------------------------------------
-
-def local_search_refine(grid, trie, rng, locked_cells=None, iterations=800,
-                         start_temp=1.0, min_temp=0.02):
-    """
-    Single-cell mutation hill-climbing/SA. `locked_cells` (the seeded-word
-    cells) are never touched, so the guarantee from place-then-fill holds
-    throughout. Returns (best_grid, best_score).
-    """
-    size = len(grid)
-    locked_cells = locked_cells or set()
-    free_cells = [(r, c) for r in range(size) for c in range(size) if (r, c) not in locked_cells]
-    if not free_cells:
-        return grid, len(count_words_in_grid(grid, trie))
-
-    current_score = len(count_words_in_grid(grid, trie))
-    best_grid = [row[:] for row in grid]
-    best_score = current_score
-
-    for step in range(iterations):
-        temp = max(min_temp, start_temp * (1 - step / iterations))
-        r, c = rng.choice(free_cells)
-        old_letter = grid[r][c]
-        new_letter = rng.choice(string.ascii_uppercase)
-        if new_letter == old_letter:
-            continue
-
-        grid[r][c] = new_letter
-        new_score = len(count_words_in_grid(grid, trie))
-        delta = new_score - current_score
-
-        if delta >= 0 or rng.random() < pow(2.718281828, delta / temp):
-            current_score = new_score
-            if current_score > best_score:
-                best_score = current_score
-                best_grid = [row[:] for row in grid]
-        else:
-            grid[r][c] = old_letter  # reject, revert
-
-    return best_grid, best_score
-
-def generate_grid_hybrid(size=6, corpus=None, seed_word_bank=None, target_seed_words=6,
-                          n=3, fill_pattern="snake", refine_iterations=800,
-                          trie=None, seed=None):
-    rng_seed = seed
-    grid, placed_seeds, locked = generate_grid(
-        size=size, corpus=corpus, seed_word_bank=seed_word_bank,
-        target_seed_words=target_seed_words, n=n, fill_pattern=fill_pattern,
-        seed=rng_seed,
-    )
-    if trie:
-        rng = random.Random(seed)
-        grid, score = local_search_refine(grid, trie, rng, locked_cells=locked,
-                                           iterations=refine_iterations)
-    else:
-        score = None
-    return grid, placed_seeds, score

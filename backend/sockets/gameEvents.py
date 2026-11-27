@@ -1,9 +1,12 @@
+import logging
 import os
+import random
 
 from flask import request
 from flask_socketio import join_room, leave_room, emit
-from logic.gridGenerator import generate_grid_hybrid, build_trie
+from logic.gridGenerator import build_ngram_model, generate_grid, seed_tiles
 from state import rooms, set_emit_full_player_list
+from twl06 import check
 
 GRID_SIZE = 6
 
@@ -12,10 +15,36 @@ _WORD_LIST_PATH = os.path.join(
 )
 
 with open(_WORD_LIST_PATH) as f:
-    _ALL_WORDS = [line.strip().upper() for line in f if line.strip()]
+    _LETTER_MODEL = build_ngram_model(line.strip() for line in f)
 
-_SEED_WORDS = [w for w in _ALL_WORDS if 3 <= len(w) <= GRID_SIZE]
-_TRIE = build_trie(_ALL_WORDS)
+
+def _load_seed_words():
+    path = os.path.join(os.path.dirname(_WORD_LIST_PATH), "seedWords.txt")
+    with open(path, encoding="utf-8-sig") as source:
+        words = dict.fromkeys(line.strip().upper() for line in source if line.strip())
+    eligible = []
+    for word in words:
+        # Any two eligible words must fit even if they share no tiles.
+        if 0 < len(seed_tiles(word)) <= GRID_SIZE ** 2 // 2 and check(word.lower()):
+            eligible.append(word)
+        else:
+            logging.getLogger(__name__).warning("Skipping unplayable seed word %s", word)
+    return tuple(eligible)
+
+_SEED_WORDS = _load_seed_words()
+
+def _draw_words(room):
+    deck = room.setdefault("_seed_deck", [])
+    drawn = []
+    for _ in range(min(2, len(_SEED_WORDS))):
+        if not deck:
+            deck.extend(_SEED_WORDS)
+            random.shuffle(deck)
+            # With an odd-sized pool the new cycle can start mid-draw.
+            if deck[-1] in drawn:
+                deck[0], deck[-1] = deck[-1], deck[0]
+        drawn.append(deck.pop())
+    return drawn
 
 
 def register_socket_events(socketio):
@@ -31,12 +60,8 @@ def register_socket_events(socketio):
             emit('error', {'message': 'Room not found'})
             return
 
-        grid, _, _ = generate_grid_hybrid(
-            size=GRID_SIZE,
-            corpus=_ALL_WORDS,
-            seed_word_bank=_SEED_WORDS,
-            trie=_TRIE,
-        )
+        grid, _, _ = generate_grid(size=GRID_SIZE, models=_LETTER_MODEL,
+                                   drawn_words=_draw_words(rooms[roomId]))
         rooms[roomId]["grid"] = grid
         socketio.emit('game_started', {'grid': grid}, room=roomId)
 

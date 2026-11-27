@@ -77,24 +77,16 @@ const GameRoom = () => {
   };
 
   useEffect(() => {
-    socket.on("update_players", (data) => {
-      setPlayers(data.players);
-    });
-
-    socket.on("game_started", () => {
-      setIsStartingGame(false);
-    });
-
-    socket.on("error", () => {
-      setIsStartingGame(false);
-    });
+    const onPlayersUpdated = ({ players }) => setPlayers(players);
+    const onError = () => setIsStartingGame(false);
+    socket.on("update_players", onPlayersUpdated);
+    socket.on("error", onError);
 
     return () => {
-      socket.off("update_players");
-      socket.off("game_started");
-      socket.off("error");
+      socket.off("update_players", onPlayersUpdated);
+      socket.off("error", onError);
     };
-  }, []);
+  }, [socket]);
 
   if (!inRoom) {
     return (
